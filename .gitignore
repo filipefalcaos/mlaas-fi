@@ -71,7 +71,7 @@ venv.bak/
 # Temp application directories
 /temp/
 /results/
-!datasets/
+/datasets/
 /datasets/*/
 
 # User-specific configuration files
