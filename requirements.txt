@@ -1,0 +1,7 @@
+boto3==1.19.1
+botocore==1.22.2
+imagecorruptions==1.1.2
+numpy==1.21.2
+Pillow==8.4.0
+setuptools==49.6.0
+scikit-image==0.19.1
