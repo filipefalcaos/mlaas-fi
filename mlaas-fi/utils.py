@@ -1,27 +1,30 @@
+import csv
 import json
 import tarfile
 
 
+# Extracts the content of a tar file
 def extract_tarfile(path, output_dir):
-    """
-    Extracts the content of a given tar file
-    :param path: The path to the tar file
-    :param output_dir: The path to the output directory
-    """
-
     tar_file = tarfile.open(path)
     tar_file.extractall(output_dir)
     tar_file.close()
 
 
+# Parses the content of a JSON file
 def parse_json(path):
-    """
-    Parses the content of a JSON file
-
-    :param path: The path to the JSON file
-    :return: The dictionary with the parsed content
-    """
-
     with open(path, 'r') as json_file:
         parsed_content = json.load(json_file)
         return parsed_content
+
+
+# Parses the AWS credentials from a CSV file
+def parse_aws_credentials(path):
+    credentials = {}
+    with open(path, 'r') as cred_csv:
+        next(cred_csv)
+        reader = csv.reader(cred_csv)
+        for row in reader:
+            credentials['access_key_id'] = row[2]
+            credentials['secret_access_key'] = row[3]
+
+    return credentials

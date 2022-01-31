@@ -14,18 +14,8 @@ from utils import extract_tarfile
 random.seed(10)  # Default seed
 
 
+# Saves the results of an experiment to a given results directory
 def save_results(expconfig, experiment_name, results_dir, preds, alt_preds, mrates):
-    """
-    Saves the results of an experiment to the disk
-
-    :param expconfig: The experiment configuration
-    :param experiment_name: The experiment name
-    :param results_dir: The base directory for all results
-    :param preds: The list of base predictions
-    :param alt_preds: The list of alternative predictions
-    :param mrates: The set of misclassification rates calculated for each fault
-    """
-
     if not os.path.exists(results_dir):
         os.makedirs(results_dir)
 
@@ -36,57 +26,34 @@ def save_results(expconfig, experiment_name, results_dir, preds, alt_preds, mrat
         json.dump(output_obj, outfile, indent=2)
 
 
+# Retrieves the predictions from a service for a given set of images
 def get_predictions(client_interface, images):
-    """
-    Retrieves the predictions from a service for a given set of images
-
-    :param client_interface: The client interface of the requested machine learning service
-    :param images: The paths to the input images
-    :return: The predictions from the service
-    """
-
     provider = client_interface['provider']
     service_type = client_interface['service_type']
     client = client_interface['client']
 
     if provider == "AWS":
         if service_type == "CELEBRITY_RECOGNITION":
-            return recognize_celebrities_rekognition(client, images)
+            return recognize_celebrities(client, images)
         elif service_type == "LABEL_DETECTION":
-            return detect_labels_rekognition(client, images)
+            return detect_labels(client, images)
         elif service_type == "NUDITY_DETECTION" or service_type == "VIOLENCE_DETECTION":
-            return detect_unsafe_labels_rekognition(client, images)
+            return detect_unsafe_labels(client, images)
         elif service_type == "TEXT_DETECTION":
-            return detect_text_rekognition(client, images)
+            return detect_text(client, images)
 
 
+# Retrieves the client to invoke a machine learning cloud service
 def get_client(provider, service_type):
-    """
-    Retrieves the client to invoke a machine learning service
-
-    :param provider: The name of the service provider
-    :param service_type: The name of the service
-    :return: The client of the requested machine learning service
-    """
-
     if provider == "AWS":
         rekognition_services = ["CELEBRITY_RECOGNITION", "LABEL_DETECTION", "NUDITY_DETECTION", "TEXT_DETECTION",
                                 "VIOLENCE_DETECTION"]
         if service_type in rekognition_services:
-            return create_rekognition_client()
+            return create_client()
 
 
+# Injects a specific data fault in an image with the given parameters
 def inject_fault(image_path, new_image_path, params, fault):
-    """
-    Injects a specific data fault in an image with the given parameters
-
-    :param image_path: The path of the image to inject the fault on
-    :param new_image_path: The path of the new image
-    :param params: The parameters (dict) of the data fault
-    :param fault: The name of the data fault
-    """
-
-    # Base image faults
     if fault == 'blur':
         apply_blur(image_path, new_image_path, params['sd'])
     elif fault == 'brightness':
@@ -102,7 +69,6 @@ def inject_fault(image_path, new_image_path, params, fault):
     elif fault == 'sp_noise':
         apply_sp_noise(image_path, new_image_path, params['proportion'])
 
-    # Weather faults
     elif fault == 'condensation':
         apply_weather(image_path, new_image_path, 'condensation', is_mask=True)
     elif fault == 'fog':
@@ -112,24 +78,17 @@ def inject_fault(image_path, new_image_path, params, fault):
     elif fault == 'rain_snow':
         apply_weather(image_path, new_image_path, 'rain_snow', severity=params['severity'])
 
-    # Unknown fault name - ignore
     else:
         return
 
 
+# Retrieves the data for an experiment and returns a sample of it according to the experiment's
+# configuration
 def get_experiment_data(dataset_base_dir, expconfig):
-    """
-    Retrieves the data for an experiment and returns a sample of it according to the
-    experiment's configuration
-
-    :param dataset_base_dir: The base directory for all datasets
-    :param expconfig: The current experiment configuration
-    :return: The sample of the experiment's data
-    """
-
-    # Extract the dataset content
     dataset = dataset_base_dir + expconfig['dataset']
     dataset_file = dataset + '.tar.gz'
+
+    # Extract the dataset content
     extract_tarfile(dataset_file, dataset_base_dir)
 
     # Set the random dataset sample - works recursively
@@ -138,14 +97,9 @@ def get_experiment_data(dataset_base_dir, expconfig):
     return dataset_images
 
 
+# Launches the configured fault injection experiments. Experiments are launched in the order they
+# are defined in the experiments configuration file
 def launch_experiments(expconfig):
-    """
-    Launches the configured Fault Injection experiments. Experiments are launched
-    in the order they are defined in the experiments configuration file
-
-    :param expconfig: The object with the configuration of the experiments
-    """
-
     for experiment_name in expconfig:
         curr_experiment = expconfig[experiment_name]
         print('\nRunning experiment "{}"...'.format(experiment_name))
@@ -196,7 +150,7 @@ def launch_experiments(expconfig):
         for key in exp_images:
             if key != "base":
                 curr_preds = exp_images[key]['preds']
-                mrate = misclassification_rate(base_preds, curr_preds, curr_experiment['metrics']['misclassification'])
+                mrate = misclassification_rate(base_preds, curr_preds, curr_experiment['metrics']['mrate'])
                 final_preds[key] = curr_preds
                 mrates[key] = mrate
                 print('({}, {}) => MRate: {}%'.format(key, curr_experiment['data_faults'][key], mrate * 100))
