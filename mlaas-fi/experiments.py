@@ -7,8 +7,8 @@ import time
 
 from faults.image import *
 from metrics import *
-from services.aws_rekognition import *
-from utils import extract_tarfile
+from services.aws_rekognition import AWSRekognition
+from utils import extract_tarfile, is_rekognition_service
 
 
 random.seed(10)  # Default seed
@@ -32,24 +32,21 @@ def get_predictions(client_interface, images):
     service_type = client_interface['service_type']
     client = client_interface['client']
 
-    if provider == "AWS":
+    if provider == "AWS" and is_rekognition_service(service_type):
         if service_type == "CELEBRITY_RECOGNITION":
-            return recognize_celebrities(client, images)
+            return client.recognize_celebrities(images)
         elif service_type == "LABEL_DETECTION":
-            return detect_labels(client, images)
+            return client.detect_labels(images)
         elif service_type == "NUDITY_DETECTION" or service_type == "VIOLENCE_DETECTION":
-            return detect_unsafe_labels(client, images)
+            return client.detect_unsafe_labels(images)
         elif service_type == "TEXT_DETECTION":
-            return detect_text(client, images)
+            return client.detect_text(images)
 
 
 # Retrieves the client to invoke a machine learning cloud service
 def get_client(provider, service_type):
-    if provider == "AWS":
-        rekognition_services = ["CELEBRITY_RECOGNITION", "LABEL_DETECTION", "NUDITY_DETECTION", "TEXT_DETECTION",
-                                "VIOLENCE_DETECTION"]
-        if service_type in rekognition_services:
-            return create_client()
+    if provider == "AWS" and is_rekognition_service(service_type):
+        return AWSRekognition('credentials.csv')
 
 
 # Injects a specific data fault in an image with the given parameters

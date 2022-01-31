@@ -28,3 +28,10 @@ def parse_aws_credentials(path):
             credentials['secret_access_key'] = row[3]
 
     return credentials
+
+
+# Checks if a service is an AWS Rekognition service
+def is_rekognition_service(service):
+    rekognition_services = ["CELEBRITY_RECOGNITION", "LABEL_DETECTION",
+                            "NUDITY_DETECTION", "TEXT_DETECTION", "VIOLENCE_DETECTION"]
+    return service in rekognition_services
