@@ -1,15 +1,12 @@
+# Computes the change (in percent) in confidence level for a group of base and alternative
+# predictions.
 def confidence_change(conf, alt_conf):
-    """
-    Computes the change (in percent) in confidence level for a group of base and alternative predictions.
-
-    :param conf: The confidence level of the base prediction
-    :param alt_conf: The confidence level of the alternative predictions
-    :returns: The confidence change
-    """
-
     return (abs(conf - alt_conf) / conf) * 100.0
 
 
+# Computes the misclassification rate for a group of base and alternative predictions. For details,
+# check: Narodytska, Nina, and Shiva Prasad Kasiviswanathan. "Simple black-box adversarial
+# perturbations for deep networks." arXiv preprint arXiv:1612.06299 (2016).
 def misclassification_rate(preds, alt_preds, k=1):
     """
     Computes the misclassification rate for a group of base and alternative predictions.
