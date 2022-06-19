@@ -8,29 +8,23 @@ from skimage.io import imsave, imread
 from skimage.util import img_as_ubyte, random_noise
 
 
-def apply_blur(image_path, new_image_path, sd=1):
-    img = imread(image_path)
-    img_blurred = img_as_ubyte(gaussian(img, sigma=sd, multichannel=True))
-    imsave(new_image_path, img_blurred)
-
-
-def apply_brightness(image_path, new_image_path, factor=1):
+def brightness_change(image_path, new_image_path, factor=1):
     img = Image.open(image_path)
     img_noise = ImageEnhance.Brightness(img).enhance(factor)
     img_noise.save(new_image_path)
 
 
 # Modification of https://github.com/yoonsikp/kromo
-def apply_chromatic_aberration(image_path, new_image_path, strength=1):
+def chromatic_aberration(image_path, new_image_path, factor=1):
     img = Image.open(image_path)
     r, g, b = img.split()
     rdata = np.asarray(r)
 
     # Apply the chromatic aberration
-    gfinal = g.resize((round((1 + 0.018 * strength) * rdata.shape[1]),
-                       round((1 + 0.018 * strength) * rdata.shape[0])), Image.ANTIALIAS)
-    bfinal = b.resize((round((1 + 0.044 * strength) * rdata.shape[1]),
-                       round((1 + 0.044 * strength) * rdata.shape[0])), Image.ANTIALIAS)
+    gfinal = g.resize((round((1 + 0.018 * factor) * rdata.shape[1]),
+                       round((1 + 0.018 * factor) * rdata.shape[0])), Image.ANTIALIAS)
+    bfinal = b.resize((round((1 + 0.044 * factor) * rdata.shape[1]),
+                       round((1 + 0.044 * factor) * rdata.shape[0])), Image.ANTIALIAS)
 
     rwidth, rheight = r.size
     gwidth, gheight = gfinal.size
@@ -50,26 +44,32 @@ def apply_chromatic_aberration(image_path, new_image_path, strength=1):
     new_img.save(new_image_path)
 
 
-def apply_gaussian_noise(image_path, new_image_path, mean=0, sd=0.1):
+def gaussian_blur(image_path, new_image_path, sd=1):
+    img = imread(image_path)
+    img_blurred = img_as_ubyte(gaussian(img, sigma=sd, multichannel=True))
+    imsave(new_image_path, img_blurred)
+
+
+def gaussian_noise(image_path, new_image_path, mean=0, sd=0.1):
     img = imread(image_path)
     img_noise = img_as_ubyte(random_noise(img, mode="gaussian", clip=True, mean=mean, var=sd ** 2))
     imsave(new_image_path, img_noise)
 
 
-def apply_grayscale(image_path, new_image_path):
+def grayscale(image_path, new_image_path):
     img = imread(image_path)
     img_grayscale = img_as_ubyte(rgb2gray(img))
     imsave(new_image_path, img_grayscale)
 
 
-def apply_missing_pixels(image_path, new_image_path, proportion=0.05, replace="b"):
+def missing_pixels(image_path, new_image_path, proportion=0.05, replace="b"):
     img = imread(image_path)
     noise_mode = "salt" if replace == "w" else "pepper"  # Replace with white or black pixels
     img_noise = img_as_ubyte(random_noise(img, mode=noise_mode, clip=True, amount=proportion))
     imsave(new_image_path, img_noise)
 
 
-def apply_sp_noise(image_path, new_image_path, proportion=0.05):
+def sp_noise(image_path, new_image_path, proportion=0.05):
     img = imread(image_path)
     img_noise = img_as_ubyte(random_noise(img, mode="s&p", clip=True, amount=proportion))
     imsave(new_image_path, img_noise)
@@ -94,7 +94,7 @@ def apply_weather_mask(image_path, new_image_path, condition):
     img_blend.save(new_image_path)
 
 
-def apply_weather(image_path, new_image_path, condition, is_mask=False, severity=1):
+def weather_conditions(image_path, new_image_path, condition, is_mask=False, severity=1):
     if is_mask:
         apply_weather_mask(image_path, new_image_path, condition)
     else:
