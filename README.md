@@ -35,7 +35,7 @@ For more details on the available image faults, please refer to [PAPER CITATION]
 
 #### Common Image Faults
 - Brightness Change (factor $f$)
-- Chromatic Aberration (strength $s$)
+- Chromatic Aberration (factor $f$)
 - Gaussian Blur (standard deviation $sd$)
 - Gaussian Noise (mean $m$; standard deviation $sd$)
 - Grayscale
