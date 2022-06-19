@@ -1,0 +1,43 @@
+{
+  "exp_1": {
+    "provider": "AWS",
+    "service_type": "TEXT_DETECTION",
+    "dataset": "text-detection",
+    "n_samples": 2,
+    "data_faults": {
+      "blur": {
+        "sd": 1.5
+      },
+      "brightness": {
+        "factor": 1.5
+      },
+      "chromatic_aberration": {
+        "factor": 2
+      },
+      "gaussian_noise": {
+        "mean": 0,
+        "sd": 0.1
+      },
+      "grayscale": null,
+      "missing_pixels": {
+        "proportion": 0.1,
+        "replace": "b"
+      },
+      "sp_noise": {
+        "proportion": 0.1
+      },
+      "condensation": null,
+      "fog": {
+        "severity": 1
+      },
+      "frost": null,
+      "rain_snow": {
+        "severity": 1
+      }
+    },
+    "metrics": {
+      "confidence_change": null,
+      "k_mrate": 3
+    }
+  }
+}

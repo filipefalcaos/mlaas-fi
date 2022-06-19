@@ -77,6 +77,7 @@ venv.bak/
 # User-specific configuration files
 credentials.csv
 expconfig.json
+.vscode
 
 # MacOS dirty little file
 .DS_Store
