@@ -1,15 +1,35 @@
 # mlaas-fi
 Data Fault Injection for MLaaS (Machine Learning as a Service).
 
+This framework allows injecting data faults into the input data provided to Machine Learning cloud
+services and then assessing the robustness of these services when exposed to those faults based on
+a set of available metrics.
+
+## Machine Learning Cloud Services
+The framework implements interfaces for using machine learning APIs from three major cloud
+providers. These APIs are split into computer vision and NLP services:
+
+### Computer Vision Services
+- Amazon Rekognition (AWS): label detection, text detection, violence detection, nudity detection,
+  celebrity recongnition
+- Vision AI (Google Cloud): label detection, text detection, violence detection, nudity detection
+- Vision Service (Azure): TODO
+
+### NLP Services
+- Amazon Comprehend (AWS): TODO
+- Cloud Natural Language (Google Cloud): TODO
+- Language Service (Azure): TODO
+
 ## Data Faults
 Data Faults are problems in the input data of a system that may arise from external data collection
-(*e.g.*, sensors, cameras) or data manipulation routines [1]. _mlaas-fi_ implements a total of 14
-data faults for two categories of data, images and text.
+(*e.g.*, sensors, cameras) or data manipulation routines [1]. The framework implements a total of
+14 data faults for two categories of data, images and text.
 
 ### Image Faults
-The available image faults in _mlaas-fi_ and their parameters are listed bellow. Their
-implementations rely on open-source Python packages, namely imagecorruptions, numpy, pillow, and
-skimage.
+The available image faults in the framework and their parameters are listed below. Their
+implementations rely on open-source Python packages, namely
+[imagecorruptions](https://github.com/bethgelab/imagecorruptions), [numpy](https://numpy.org),
+[pillow](https://python-pillow.org), and [scikit-image](https://scikit-image.org).
 
 For more details on the available image faults, please refer to [PAPER CITATION].
 
@@ -29,12 +49,14 @@ For more details on the available image faults, please refer to [PAPER CITATION]
 - Rain/Snow (severity $s$)
 
 ### Text Faults
+The available text faults in _mlaas-fi_ and their parameters are listed below.
+
 - Missing Block (TODO)
 - Missing Words (TODO)
 - OCR Error (TODO)
 
 ## Using Datasets
-_mlaas-fi_ requires a dataset to run experiments. Valid image datasets are simply tar files which
+_mlaas-fi_ requires a dataset to run experiments. Valid image datasets are are tarball files that
 should expand to a single directory with the dataset images.
 
 ### Study Datasets
@@ -46,10 +68,10 @@ faults:
   detection dataset [3].
 - Nudity Detection: A random sample of 500 images from the test set of the NudeNet dataset [4].
 - Violence Detection: random A sample of 198 images of child soldiers and police violence from the
-  Human Rights UNderstanding (HRUN) dataset [5]. All child soldiers images have the presence of
+  Human Rights UNderstanding (HRUN) dataset [5]. All child soldier images have the presence of
   weapons.
 - Text Detection: A random sample of 398 images captured in different environments from the KAIST
-  Scene Text Database [6]. Only images with english text only were selected.
+  Scene Text Database [6]. Only images with English text only were selected.
 
 ## References
 [1] Nurminen, Jukka K., et al. "Software framework for data fault injection to test machine
