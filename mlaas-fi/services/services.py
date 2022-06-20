@@ -19,9 +19,9 @@ def get_predictions(expconfig, client, images):
 
 
 # Retrieves the client to invoke a machine learning cloud service
-def get_client(expconfig):
+def get_client(expconfig, services_config):
     provider = expconfig['provider']
     service_type = expconfig['service_type']
 
-    if provider == "AWS" and is_rekognition_service(service_type):
-        return AWSRekognition(expconfig['credentials_file'])
+    if provider == "AWS" and is_rekognition_service(service_type) and services_config['providers']['AWS']:
+        return AWSRekognition(services_config['providers']['AWS'])

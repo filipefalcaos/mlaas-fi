@@ -40,10 +40,11 @@ def get_experiment_data(dataset_base_dir, expconfig):
 
 # Launches the configured fault injection experiments. Experiments are launched in the order they
 # are defined in the experiments configuration file
-def launch_experiments(expconfig):
-    for experiment_name in expconfig:
-        curr_experiment = expconfig[experiment_name]
-        print('\nRunning experiment "{}"...'.format(experiment_name))
+def launch_experiments(exp_config, services_config):
+    experiments = exp_config['experiments']
+    for experiment_name in experiments:
+        curr_experiment = experiments[experiment_name]
+        print('\nStarting experiment "{}"'.format(experiment_name))
 
         # Get the configured dataset and set the temporary images dir
         exp_images = {'base': {}}
@@ -68,7 +69,7 @@ def launch_experiments(expconfig):
                 exp_images[fault]['images'].append(new_path)
 
         # Setup the configured service and perform the predictions
-        client = get_client(curr_experiment)
+        client = get_client(curr_experiment, services_config)
         for key in exp_images:
             print("Performing predictions ({})...".format(key))
             preds = get_predictions(curr_experiment, client, exp_images[key]['images'])
@@ -88,4 +89,4 @@ def launch_experiments(expconfig):
         save_results(curr_experiment, experiment_name, mrates)
 
     print('\nAll experiments finished')
-    print('Results saved in the \'results\' directory')
+    print('Results saved in the "results" directory')

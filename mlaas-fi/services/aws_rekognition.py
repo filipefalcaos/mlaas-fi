@@ -1,16 +1,14 @@
 import boto3
 from botocore.exceptions import ClientError
-from utils import parse_aws_credentials
 
 
 class AWSRekognition:
-    def __init__(self, credentials_file):
-        self.credentials = parse_aws_credentials(credentials_file)
+    def __init__(self, aws_config):
         self.client = boto3.client(
             'rekognition',
-            aws_access_key_id=self.credentials['access_key_id'],
-            aws_secret_access_key=self.credentials['secret_access_key'],
-            region_name='us-east-2'
+            aws_access_key_id=aws_config['access_key_id'],
+            aws_secret_access_key=aws_config['secret_access_key'],
+            region_name=aws_config['region_name']
         )
 
 
