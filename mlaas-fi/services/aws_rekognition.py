@@ -14,76 +14,63 @@ class AWSRekognition:
 
     # Uses the "detect_labels" API from boto3 (Amazon Rekognition) to detect the labels in a list
     # of images
-    def detect_labels(self, imgs_paths):
-        labels = []
-        for img_path in imgs_paths:
-            with open(img_path, 'rb') as img_file:
-                img = {'Bytes': img_file.read()}
-
-            try:
-                response = self.client.detect_labels(Image=img)
-                response_labels = response['Labels']
-                label_names = [response_label['Name'] for response_label in response_labels]
-                labels.append(label_names)
-            except ClientError:
-                raise
-
-        return labels
+    def __detect_labels(self, img):
+        response = self.client.detect_labels(Image=img)
+        response_labels = response['Labels']
+        label_names = [response_label['Name'] for response_label in response_labels]
+        return label_names
 
 
     # Uses the "detect_text" API from boto3 (Amazon Rekognition) to detect text occurrence (lines
-    # only) in a list of images
-    def detect_text(self, imgs_paths):
-        texts = []
-        for img_path in imgs_paths:
-            with open(img_path, 'rb') as img_file:
-                img = {'Bytes': img_file.read()}
-
-            try:
-                response = self.client.detect_text(Image=img)
-                response_texts = response['TextDetections']
-                texts_content = [resp_text['DetectedText'] for resp_text in response_texts if resp_text['Type'] == 'LINE']
-                texts.append(texts_content)
-            except ClientError:
-                raise
-
-        return texts
+    # only)
+    def __detect_text(self, img):
+        response = self.client.detect_text(Image=img)
+        response_texts = response['TextDetections']
+        texts_content = [resp_text['DetectedText'] for resp_text in response_texts if resp_text['Type'] == 'LINE']
+        return texts_content
 
 
     # Uses the "detect_moderation_labels" API from boto3 (Amazon Rekognition) to detect unsafe
-    # content in a list of images
-    def detect_unsafe_labels(self, imgs_paths):
-        labels = []
-        for img_path in imgs_paths:
-            with open(img_path, 'rb') as img_file:
-                img = {'Bytes': img_file.read()}
-
-            try:
-                response = self.client.detect_moderation_labels(Image=img)
-                response_labels = response['ModerationLabels']
-                label_names = [response_label['Name'] for response_label in response_labels]
-                labels.append(label_names)
-            except ClientError:
-                raise
-
-        return labels
+    # content
+    def __detect_unsafe_labels(self, img):
+        response = self.client.detect_moderation_labels(Image=img)
+        response_labels = response['ModerationLabels']
+        label_names = [response_label['Name'] for response_label in response_labels]
+        return label_names
 
 
     # Uses the "recognize_celebrities" API from boto3 (Amazon Rekognition) to recognize celebrities
-    # in a list of images
-    def recognize_celebrities(self, imgs_paths):
-        celebrities = []
-        for img_path in imgs_paths:
+    def __recognize_celebrities(self, img):
+        response = self.client.recognize_celebrities(Image=img)
+        response_celebrities = response['CelebrityFaces']
+        celebrities_ids = [response_celebrity['Name'] for response_celebrity in response_celebrities]
+        celebrities_ids = celebrities_ids[:1]  # Return only a single celebrity
+        return celebrities_ids
+    
+
+    # Runs a specific Rekognition service for a set of images
+    def run_service(self, service_type, img_paths):
+        # Retrieves the prediction function for the service type
+        predict_function = None
+        if service_type == "CELEBRITY_RECOGNITION":
+            predict_function = self.__recognize_celebrities
+        elif service_type == "LABEL_DETECTION":
+            predict_function = self.__detect_labels
+        elif service_type == "NUDITY_DETECTION" or service_type == "VIOLENCE_DETECTION":
+            predict_function = self.__detect_unsafe_labels
+        elif service_type == "TEXT_DETECTION":
+            predict_function = self.__detect_text
+
+        # Get the predictions for the images
+        predictions = []
+        for img_path in img_paths:
             with open(img_path, 'rb') as img_file:
                 img = {'Bytes': img_file.read()}
 
             try:
-                response = self.client.recognize_celebrities(Image=img)
-                response_celebrities = response['CelebrityFaces']
-                celebrities_ids = [response_celebrity['Name'] for response_celebrity in response_celebrities]
-                celebrities_ids = celebrities_ids[:1]  # Return only a single celebrity
-                celebrities.append(celebrities_ids)
+                if predict_function is not None:
+                    predictions.append(predict_function(img))
             except ClientError:
-                raise
+                raise('Failed to run AWS Rekognition service')
 
-        return celebrities
+        return predictions
