@@ -75,8 +75,8 @@ venv.bak/
 /datasets/*/
 
 # User-specific configuration files
-credentials.csv
-expconfig.json
+exp.config.json
+services.config.json
 .vscode
 
 # MacOS dirty little file
