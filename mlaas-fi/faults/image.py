@@ -87,15 +87,15 @@ def apply_weather_image_corruptions(image_path, new_image_path, condition, sever
 # - Condensation: https://github.com/francescosecci/Python_Image_Failures
 # - Frost: https://github.com/bethgelab/imagecorruptions
 def apply_weather_mask(image_path, new_image_path, condition):
-    mask_path = resource_filename(__name__, '../masks/' + condition + '.jpeg')
+    mask_path = resource_filename(__name__, './masks/' + condition + '.jpeg')
     img = Image.open(image_path)
     img_mask = Image.open(mask_path).convert('RGB').resize(img.size)
     img_blend = Image.blend(img, img_mask, alpha=0.4)
     img_blend.save(new_image_path)
 
 
-def weather_conditions(image_path, new_image_path, condition, is_mask=False, severity=1):
-    if is_mask:
+def weather_conditions(image_path, new_image_path, condition, severity=1):
+    if condition == 'condensation' or condition == 'frost':
         apply_weather_mask(image_path, new_image_path, condition)
     else:
         cond = 'snow' if condition == 'rain_snow' else condition

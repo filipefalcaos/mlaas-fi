@@ -21,11 +21,11 @@ def inject_fault(image_path, new_image_path, params, fault):
 
     # Weather-related image faults
     elif fault == 'condensation':
-        weather_conditions(image_path, new_image_path, 'condensation', is_mask=True)
+        weather_conditions(image_path, new_image_path, 'condensation')
     elif fault == 'fog':
         weather_conditions(image_path, new_image_path, 'fog', severity=params['severity'])
     elif fault == 'frost':
-        weather_conditions(image_path, new_image_path, 'frost', is_mask=True)
+        weather_conditions(image_path, new_image_path, 'frost')
     elif fault == 'rain_snow':
         weather_conditions(image_path, new_image_path, 'rain_snow', severity=params['severity'])
 
