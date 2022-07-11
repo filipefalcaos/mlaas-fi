@@ -14,19 +14,19 @@ random.seed(10)  # Default seed
 
 
 # Saves the results of an experiment to a given results directory
-def save_results(expconfig, experiment_name, mrates):
-    output_dir = expconfig['output_dir'] + '/'
+def save_results(exp_config, experiment_name, mrates):
+    output_dir = exp_config['output_dir'] + '/'
     create_dir(output_dir)
 
-    output_obj = {'experiment': experiment_name, 'config': expconfig, 'mrate': mrates}
+    output_obj = {'experiment': experiment_name, 'config': exp_config, 'mrate': mrates}
     output_path = output_dir + experiment_name + '-' + str(int(time.time())) + '.json'
     dump_json(output_path, output_obj)
 
 
 # Retrieves the data for an experiment and returns a sample of it according to the experiment's
 # configuration
-def get_experiment_data(dataset_base_dir, expconfig):
-    dataset = dataset_base_dir + expconfig['dataset']
+def get_experiment_data(dataset_base_dir, exp_config):
+    dataset = dataset_base_dir + exp_config['dataset']
     dataset_file = dataset + '.tar.gz'
 
     # Extract the dataset content
@@ -34,7 +34,7 @@ def get_experiment_data(dataset_base_dir, expconfig):
 
     # Set the random dataset sample - works recursively
     dataset_images = glob.glob(dataset + '/**/*.jpg', recursive=True)
-    dataset_images = random.sample(dataset_images, expconfig['n_samples'])
+    dataset_images = random.sample(dataset_images, exp_config['n_samples'])
     return dataset_images
 
 
@@ -93,4 +93,4 @@ def launch_experiments(exp_config, services_config):
         save_results(curr_experiment, experiment_name, mrates)
 
     print('\nAll experiments finished')
-    print('Results saved in the "results" directory')
+    print('Results saved in the "results" directory') # TODO: use exp_config['output_dir']
