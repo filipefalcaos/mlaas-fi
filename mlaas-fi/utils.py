@@ -35,12 +35,3 @@ def parse_json(path):
 def dump_json(path, data):
     with open(path, 'w') as outfile:
         json.dump(data, outfile, indent=2)
-
-
-# Checks if a service is an AWS Rekognition service
-def is_rekognition_service(service):
-    rekognition_services = [
-        "CELEBRITY_RECOGNITION", "LABEL_DETECTION", "NUDITY_DETECTION", "TEXT_DETECTION",
-        "VIOLENCE_DETECTION"
-    ]
-    return service in rekognition_services

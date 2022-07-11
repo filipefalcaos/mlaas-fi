@@ -2,7 +2,7 @@ from google.cloud import vision
 
 
 class GoogleVision:
-    def __init__(self, aws_config):
+    def __init__(self):
         self.client = vision.ImageAnnotatorClient()
 
 
