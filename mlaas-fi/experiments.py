@@ -68,8 +68,12 @@ def launch_experiments(exp_config, services_config):
                 inject_fault(image_path, new_path, fault_params, fault)
                 exp_images[fault]['images'].append(new_path)
 
-        # Setup the configured service and perform the predictions
+        # Setup the configured provider/service
         client = get_client(curr_experiment, services_config)
+        if client is None:
+            return
+        
+        # Perform the predictions
         for key in exp_images:
             print("Performing predictions ({})...".format(key))
             preds = get_predictions(curr_experiment, client, exp_images[key]['images'])

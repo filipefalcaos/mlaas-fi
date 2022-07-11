@@ -1,7 +1,7 @@
 {
   "exp_1": {
     "provider": "AWS",
-    "service_type": "TEXT_DETECTION",
+    "service": "TEXT_DETECTION",
     "dataset": "text-detection",
     "n_samples": 2,
     "data_faults": {
