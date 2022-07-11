@@ -14,24 +14,25 @@ class AWSRekognition:
 
     # Labels objects detected in an image
     # Leveraged API: detect_labels from boto3
-    def __detect_labels(self, imgs_paths):
+    def __detect_labels(self, img):
         response = self.client.detect_labels(Image=img)
         response_labels = response['Labels']
         label_names = [response_label['Name'] for response_label in response_labels]
         return label_names
 
 
-    # Detects text occurrence (lines only) in an image
+    # Detects text occurrences (lines only) in an image
     # Leveraged API: detect_text from boto3
-    def __detect_text(self, imgs_paths):
+    def __detect_text(self, img):
         response = self.client.detect_text(Image=img)
         response_texts = response['TextDetections']
         texts_content = [resp_text['DetectedText'] for resp_text in response_texts if resp_text['Type'] == 'LINE']
         return texts_content
 
 
-    # Detects unsafe content in an image
+    # Detects unsafe content (violence and adult) in an image
     # Leveraged API: detect_moderation_labels from boto3
+    # TODO: handle different label types
     def __detect_unsafe_labels(self, img):
         response = self.client.detect_moderation_labels(Image=img)
         response_labels = response['ModerationLabels']
@@ -49,28 +50,27 @@ class AWSRekognition:
         return celebrities_ids
 
 
-    def run_service(self, rekognition_service, images):
-        # Map a rekognition service to a function
-        rekognition_service_fn = None
-        if rekognition_service == "CELEBRITY_RECOGNITION":
-            rekognition_service_fn = self.__recognize_celebrities
-        elif rekognition_service == "LABEL_DETECTION":
-            rekognition_service_fn = self.__detect_labels
-        elif rekognition_service == "NUDITY_DETECTION" or rekognition_service == "VIOLENCE_DETECTION":
-            rekognition_service_fn = self.__detect_unsafe_labels
-        elif rekognition_service == "TEXT_DETECTION":
-            rekognition_service_fn = self.__detect_text
+    def run_service(self, service, images):
+        # Map a service to a function
+        service_fn = None
+        if service == "CELEBRITY_RECOGNITION":
+            service_fn = self.__recognize_celebrities
+        elif service == "LABEL_DETECTION":
+            service_fn = self.__detect_labels
+        elif service == "NUDITY_DETECTION" or service == "VIOLENCE_DETECTION":
+            service_fn = self.__detect_unsafe_labels
+        elif service == "TEXT_DETECTION":
+            service_fn = self.__detect_text
 
-        # Apply the rekognition function to the given images
+        # Apply the function to the given images
         output_list = []
         for image in images:
             with open(image, 'rb') as img_file:
                 img = {'Bytes': img_file.read()}
-            
             try:
-                output = rekognition_service_fn(img)
+                output = service_fn(img)
                 output_list.append(output)
             except ClientError:
-                print('Unable to run {} for input image {}'.format(rekognition_service, image))
+                print('Unable to run {} for input image {}'.format(service, image))
         
         return output_list
