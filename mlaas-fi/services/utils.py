@@ -1,11 +1,11 @@
 # Common vision services across all supported providers
 COMMON_VISION_SERVICES = [
-    "LABEL_DETECTION", "NUDITY_DETECTION", "TEXT_DETECTION", "VIOLENCE_DETECTION"
+    'LABEL_DETECTION', 'NUDITY_DETECTION', 'TEXT_DETECTION', 'VIOLENCE_DETECTION'
 ]
 
 # Checks if a service is a supported AWS Rekognition service
 def is_rekognition_service(service):
-    rekognition_only = ["CELEBRITY_RECOGNITION"]
+    rekognition_only = ['CELEBRITY_RECOGNITION']
     return service in [*COMMON_VISION_SERVICES, *rekognition_only]
 
 

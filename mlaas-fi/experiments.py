@@ -62,7 +62,7 @@ def launch_experiments(exp_config, services_config):
                 # Get the temporary noisy image path
                 basename = os.path.basename(image_path)
                 image_name, extension = os.path.splitext(basename)
-                new_path = BASE_TEMP_DIR + image_name + "-" + fault + extension
+                new_path = BASE_TEMP_DIR + image_name + '-' + fault + extension
 
                 # Inject the fault
                 inject_fault(image_path, new_path, fault_params, fault)
@@ -75,7 +75,7 @@ def launch_experiments(exp_config, services_config):
         
         # Perform the predictions
         for key in exp_images:
-            print("Performing predictions ({})...".format(key))
+            print('Performing predictions ({})...'.format(key))
             preds = get_predictions(curr_experiment, client, exp_images[key]['images'])
             exp_images[key]['preds'] = preds
 
@@ -84,7 +84,7 @@ def launch_experiments(exp_config, services_config):
         base_preds = exp_images['base']['preds']
 
         for key in exp_images:
-            if key != "base":
+            if key != 'base':
                 curr_preds = exp_images[key]['preds']
                 mrate = misclassification_rate(base_preds, curr_preds, curr_experiment['metrics']['k_mrate'])
                 mrates[key] = mrate

@@ -53,13 +53,13 @@ class AWSRekognition:
     def run_service(self, service, images):
         # Map a service to a function
         service_fn = None
-        if service == "CELEBRITY_RECOGNITION":
+        if service == 'CELEBRITY_RECOGNITION':
             service_fn = self.__recognize_celebrities
-        elif service == "LABEL_DETECTION":
+        elif service == 'LABEL_DETECTION':
             service_fn = self.__detect_labels
-        elif service == "NUDITY_DETECTION" or service == "VIOLENCE_DETECTION":
+        elif service == 'NUDITY_DETECTION' or service == 'VIOLENCE_DETECTION':
             service_fn = self.__detect_unsafe_labels
-        elif service == "TEXT_DETECTION":
+        elif service == 'TEXT_DETECTION':
             service_fn = self.__detect_text
 
         # Apply the function to the given images
