@@ -12,7 +12,7 @@ class GoogleVision:
         image = vision.Image(content=img)
         response = self.client.label_detection(image=image)
         response_labels = response.label_annotations
-        label_names = [response_label['description'] for response_label in labels]
+        label_names = [response_label['description'] for response_label in response_labels]
         return label_names
     
 
@@ -52,7 +52,7 @@ class GoogleVision:
             try:
                 output = service_fn(img)
                 output_list.append(output)
-            except ClientError:
+            except BaseException:
                 print('Unable to run {} for input image {}'.format(service, image))
         
         return output_list
