@@ -35,7 +35,7 @@ def chromatic_aberration(image_path, new_image_path, factor=1):
     gwdiff = (bwidth - gwidth) // 2
 
     # Centre the channels
-    new_img = Image.merge("RGB", (
+    new_img = Image.merge('RGB', (
         r.crop((-rwdiff, -rhdiff, bwidth - rwdiff, bheight - rhdiff)),
         gfinal.crop((-gwdiff, -ghdiff, bwidth - gwdiff, bheight - ghdiff)),
         bfinal))
@@ -52,7 +52,7 @@ def gaussian_blur(image_path, new_image_path, sd=1):
 
 def gaussian_noise(image_path, new_image_path, mean=0, sd=0.1):
     img = imread(image_path)
-    img_noise = img_as_ubyte(random_noise(img, mode="gaussian", clip=True, mean=mean, var=sd ** 2))
+    img_noise = img_as_ubyte(random_noise(img, mode='gaussian', clip=True, mean=mean, var=sd ** 2))
     imsave(new_image_path, img_noise)
 
 
@@ -62,16 +62,16 @@ def grayscale(image_path, new_image_path):
     imsave(new_image_path, img_grayscale)
 
 
-def missing_pixels(image_path, new_image_path, proportion=0.05, replace="b"):
+def missing_pixels(image_path, new_image_path, proportion=0.05, replace='b'):
     img = imread(image_path)
-    noise_mode = "salt" if replace == "w" else "pepper"  # Replace with white or black pixels
+    noise_mode = 'salt' if replace == 'w' else 'pepper'  # Replace with white or black pixels
     img_noise = img_as_ubyte(random_noise(img, mode=noise_mode, clip=True, amount=proportion))
     imsave(new_image_path, img_noise)
 
 
 def sp_noise(image_path, new_image_path, proportion=0.05):
     img = imread(image_path)
-    img_noise = img_as_ubyte(random_noise(img, mode="s&p", clip=True, amount=proportion))
+    img_noise = img_as_ubyte(random_noise(img, mode='s&p', clip=True, amount=proportion))
     imsave(new_image_path, img_noise)
 
 
