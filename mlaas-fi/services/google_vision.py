@@ -5,7 +5,6 @@ class GoogleVision:
     def __init__(self):
         self.client = vision.ImageAnnotatorClient()
 
-
     # Labels objects detected in an image
     # Leveraged API: label_detection from google.cloud.vision
     def __detect_labels(self, img):
@@ -14,7 +13,6 @@ class GoogleVision:
         response_labels = response.label_annotations
         label_names = [response_label['description'] for response_label in response_labels]
         return label_names
-    
 
     # Detects text occurrences (only TEXT_DETECTION type) in an image
     # Leveraged API: text_detection from google.cloud.vision
@@ -22,8 +20,7 @@ class GoogleVision:
         image = vision.Image(content=img)
         response = self.client.text_detection(image=image)
         response_texts = response.text_annotations
-        print(response_texts) # TODO: extract detected text
-    
+        print(response_texts)  # TODO: extract detected text
 
     # Detects unsafe content (violence and adult) in an image
     # Leveraged API: safe_search_detection from google.cloud.vision
@@ -31,8 +28,7 @@ class GoogleVision:
         image = vision.Image(content=img)
         response = self.client.safe_search_detection(image=image)
         response_labels = response.safe_search_annotation
-        print(response_labels) # TODO: extract detected labels
-
+        print(response_labels)  # TODO: extract detected labels
 
     def run_service(self, service, images):
         # Map a service to a function
@@ -54,5 +50,5 @@ class GoogleVision:
                 output_list.append(output)
             except BaseException:
                 print('Unable to run {} for input image {}'.format(service, image))
-        
+
         return output_list

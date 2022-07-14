@@ -14,7 +14,8 @@ def get_client(exp_config, services_config):
     provider = exp_config['provider']
     service = exp_config['service']
 
-    if provider == 'AWS' and is_rekognition_service(service) and services_config['providers']['AWS']:
+    if (provider == 'AWS' and is_rekognition_service(service) and
+            services_config['providers']['AWS']):
         return AWSRekognition(services_config['providers']['AWS'])
     elif provider == 'GOOGLE_CLOUD' and is_google_vision_service(service):
         return GoogleVision()

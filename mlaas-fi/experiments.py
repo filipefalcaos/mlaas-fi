@@ -53,7 +53,7 @@ def launch_experiments(exp_config, services_config):
 
         # Get the configured dataset and set the temporary images dir
         exp_images = {'base': {}}
-        dataset_base_dir = 'datasets/' # TODO: move to constants
+        dataset_base_dir = 'datasets/'  # TODO: move to constants
         exp_images['base']['images'] = get_experiment_data(dataset_base_dir, curr_experiment)
         recreate_dir(BASE_TEMP_DIR)
 
@@ -71,16 +71,16 @@ def launch_experiments(exp_config, services_config):
                 # Inject the fault
                 inject_fault(image_path, new_path, fault_params, fault)
                 exp_images[fault]['images'].append(new_path)
-        
+
         print_step('Injecting data faults on {} images', [curr_experiment['n_samples']])
 
         # Setup the configured provider/service
         client = get_client(curr_experiment, services_config)
         if client is None:
             return
-        
+
         print_step('Getting client for service {}', [curr_experiment['service']])
-        
+
         # Perform the predictions
         for key in exp_images:
             print('Performing predictions ({})...'.format(key))
@@ -96,9 +96,11 @@ def launch_experiments(exp_config, services_config):
         for key in exp_images:
             if key != 'base':
                 curr_preds = exp_images[key]['preds']
-                mrate = misclassification_rate(base_preds, curr_preds, curr_experiment['metrics']['k_mrate'])
+                mrate = misclassification_rate(
+                    base_preds, curr_preds, curr_experiment['metrics']['k_mrate']
+                )
                 mrates[key] = mrate
-        
+
         print_step('Computing metrics')
 
         # Save the experiment results
@@ -106,4 +108,4 @@ def launch_experiments(exp_config, services_config):
         print_step('Saving results')
 
     print('\nAll experiments finished')
-    print('Results saved in the "results" directory') # TODO: use exp_config['output_dir']
+    print('Results saved in the "results" directory')  # TODO: use exp_config['output_dir']
