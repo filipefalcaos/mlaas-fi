@@ -7,31 +7,24 @@ a set of available metrics.
 
 ## Machine Learning Cloud Services
 The framework implements interfaces for using machine learning APIs from three major cloud
-providers. These APIs are split into computer vision and NLP services:
+providers. Currently, only computer vision services are implemented:
 
-### Computer Vision Services
 - Amazon Rekognition (AWS): label detection, text detection, violence detection, nudity detection,
   celebrity recongnition
 - Vision AI (Google Cloud): label detection, text detection, violence detection, nudity detection
-- Vision Service (Azure): TODO
-
-### NLP Services
-- Amazon Comprehend (AWS): TODO
-- Cloud Natural Language (Google Cloud): TODO
-- Language Service (Azure): TODO
+- Vision Service (Microsoft Azure): TODO
 
 ## Data Faults
 Data Faults are problems in the input data of a system that may arise from external data collection
 (*e.g.*, sensors, cameras) or data manipulation routines [1]. The framework implements a total of
-14 data faults for two categories of data, images and text.
+11 data faults that can be injected into images.
 
-### Image Faults
 The available image faults in the framework and their parameters are listed below. Their
 implementations rely on open-source Python packages, namely
 [imagecorruptions](https://github.com/bethgelab/imagecorruptions), [numpy](https://numpy.org),
 [pillow](https://python-pillow.org), and [scikit-image](https://scikit-image.org).
 
-For more details on the available image faults, please refer to [PAPER CITATION].
+For more details on the available image faults, please refer to [TODO: PAPER CITATION].
 
 #### Common Image Faults
 - Brightness Change (factor $f$)
@@ -48,19 +41,12 @@ For more details on the available image faults, please refer to [PAPER CITATION]
 - Frost
 - Rain/Snow (severity $s$)
 
-### Text Faults
-The available text faults in _mlaas-fi_ and their parameters are listed below.
-
-- Missing Block (TODO)
-- Missing Words (TODO)
-- OCR Error (TODO)
-
 ## Using Datasets
 _mlaas-fi_ requires a dataset to run experiments. Valid image datasets are are tarball files that
 should expand to a single directory with the dataset images.
 
 ### Study Datasets
-Five datasets were used in [PAPER CITATION] to evaluate the robustness of MLaaS services to data
+Five datasets were used in [TODO: PAPER CITATION] to evaluate the robustness of MLaaS services to data
 faults:
 
 - Celebrity Recognition: A random sample of 500 aligned and cropped images from the CelebA dataset [2].
