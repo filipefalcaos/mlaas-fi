@@ -11,7 +11,7 @@ def inject_fault(image_path, new_image_path, params, fault):
     elif fault == 'chromatic_aberration':
         chromatic_aberration(image_path, new_image_path, params['factor'])
     elif fault == 'gaussian_noise':
-        gaussian_noise(image_path, new_image_path, params['mean'], params['sd'])
+        gaussian_noise(image_path, new_image_path, params['sd'])
     elif fault == 'grayscale':
         grayscale(image_path, new_image_path)
     elif fault == 'missing_pixels':

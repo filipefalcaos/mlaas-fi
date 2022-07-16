@@ -6,7 +6,8 @@ from .utils import is_google_vision_service, is_rekognition_service
 # Retrieves the predictions from a service for a given set of images
 def get_predictions(exp_config, client, images):
     service = exp_config['service']
-    client.run_service(service, images)
+    predictions = client.run_service(service, images)
+    return predictions
 
 
 # Retrieves the client to invoke a machine learning cloud service

@@ -3,6 +3,8 @@ import os
 import shutil
 import tarfile
 
+from PIL import Image
+
 
 # Creates a directory in a given path if not existent
 def create_dir(dir_path):
@@ -10,7 +12,12 @@ def create_dir(dir_path):
         os.makedirs(dir_path)
 
 
-# Recreate a directory if it already exists
+# Deletes a directory
+def delete_dir(dir_path):
+    shutil.rmtree(dir_path)
+
+
+# Recreates a directory if it already exists
 def recreate_dir(dir_path):
     if os.path.exists(dir_path):
         shutil.rmtree(dir_path)
@@ -35,3 +42,8 @@ def parse_json(path):
 def dump_json(path, data):
     with open(path, 'w') as outfile:
         json.dump(data, outfile, indent=2)
+
+
+# Checks wether a dict has a given key
+def has_key(dict, key):
+    return key in dict

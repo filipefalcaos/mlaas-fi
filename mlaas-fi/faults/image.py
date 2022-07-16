@@ -17,6 +17,11 @@ def brightness_change(image_path, new_image_path, factor=1):
 # Modification of https://github.com/yoonsikp/kromo
 def chromatic_aberration(image_path, new_image_path, factor=1):
     img = Image.open(image_path)
+
+    # Debugging
+    if img.mode != "RGB":
+        print(image_path)
+
     r, g, b = img.split()
     rdata = np.asarray(r)
 
@@ -46,13 +51,13 @@ def chromatic_aberration(image_path, new_image_path, factor=1):
 
 def gaussian_blur(image_path, new_image_path, sd=1):
     img = imread(image_path)
-    img_blurred = img_as_ubyte(gaussian(img, sigma=sd, multichannel=True))
+    img_blurred = img_as_ubyte(gaussian(img, sigma=sd, channel_axis=2))
     imsave(new_image_path, img_blurred)
 
 
-def gaussian_noise(image_path, new_image_path, mean=0, sd=0.1):
+def gaussian_noise(image_path, new_image_path, sd=0.1):
     img = imread(image_path)
-    img_noise = img_as_ubyte(random_noise(img, mode='gaussian', clip=True, mean=mean, var=sd ** 2))
+    img_noise = img_as_ubyte(random_noise(img, mode='gaussian', clip=True, var=sd ** 2))
     imsave(new_image_path, img_noise)
 
 

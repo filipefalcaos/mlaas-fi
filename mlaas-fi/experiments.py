@@ -1,16 +1,32 @@
 import glob
 import os
 import random
+import sys
 import time
 
 from constants import BASE_TEMP_DIR
 from faults import inject_fault
-from metrics import misclassification_rate, confidence_change
 from services import get_client, get_predictions
-from utils import create_dir, dump_json, extract_tarfile, recreate_dir
+from utils import create_dir, delete_dir, dump_json, extract_tarfile, has_key, recreate_dir
 
 
 random.seed(10)  # Default seed
+
+
+# Experiment steps
+INJECT_FAULTS = 'Injecting {} on {} images'
+GET_PREDICTIONS = 'Performing {}predictions using {} ({})'
+SAVE_RESULTS = 'Saving results'
+
+
+# Prints a step (i.e., a message followed by a check mark)
+def print_step(message, parameters=[], complete=False, multistep=False):
+    end = '...          \n'  # TODO: improve spacing here
+    if multistep or complete:
+        sys.stdout.write('\033[F')
+    if complete:
+        end = ' \033[92m' + u'\u2713' + '\033[0m           \n'
+    print((message).format(*parameters), end=end)
 
 
 # Retrieves the data for an experiment and returns a sample of it according to the experiment's
@@ -18,27 +34,23 @@ random.seed(10)  # Default seed
 def get_experiment_data(dataset_base_dir, exp_config):
     dataset = dataset_base_dir + exp_config['dataset']
 
-    # Extract the dataset content
-    extract_tarfile(dataset, dataset_base_dir)
-
-    # Set the random dataset sample - works recursively
+    # Extract the dataset content - works recursively
+    extract_tarfile(dataset + '.tar.gz', dataset_base_dir)
     dataset_images = glob.glob(dataset + '/**/*.jpg', recursive=True)
-    dataset_images = random.sample(dataset_images, exp_config['n_samples'])
+
+    # Set the random dataset sample
+    if has_key(exp_config, 'n_samples'):
+        dataset_images = random.sample(dataset_images, exp_config['n_samples'])
+
     return dataset_images
 
 
-# Prints a step (i.e., a message followed by a check mark)
-def print_step(message, parameters):
-    print(message.format(*parameters), end='')
-    print(u'\u2713')
-
-
 # Saves the results of an experiment to a given results directory
-def save_results(exp_config, experiment_name, mrates):
+def save_results(exp_config, experiment_name, predictions):
     output_dir = exp_config['output_dir'] + '/'
     create_dir(output_dir)
 
-    output_obj = {'experiment': experiment_name, 'config': exp_config, 'mrate': mrates}
+    output_obj = {'experiment': experiment_name, 'config': exp_config, 'predictions': predictions}
     output_path = output_dir + experiment_name + '-' + str(int(time.time())) + '.json'
     dump_json(output_path, output_obj)
 
@@ -55,11 +67,19 @@ def launch_experiments(exp_config, services_config):
         exp_images = {'base': {}}
         dataset_base_dir = 'datasets/'  # TODO: move to constants
         exp_images['base']['images'] = get_experiment_data(dataset_base_dir, curr_experiment)
+
+        dataset_len = len(exp_images['base']['images'])
+        faults_len = len(curr_experiment['data_faults'])
+
         recreate_dir(BASE_TEMP_DIR)
 
         # Inject data faults into the dataset
-        for fault in curr_experiment['data_faults']:
+        for idx, fault in enumerate(curr_experiment['data_faults']):
+            step_str = fault + ' (' + str(idx + 1) + '/' + str(faults_len) + ')'
+            is_multistep = False if idx == 0 else True
+            print_step(INJECT_FAULTS, [step_str, dataset_len], multistep=is_multistep)
             exp_images[fault] = {'images': []}
+
             for image_path in exp_images['base']['images']:
                 fault_params = curr_experiment['data_faults'][fault]
 
@@ -72,40 +92,28 @@ def launch_experiments(exp_config, services_config):
                 inject_fault(image_path, new_path, fault_params, fault)
                 exp_images[fault]['images'].append(new_path)
 
-        print_step('Injecting data faults on {} images', [curr_experiment['n_samples']])
+        print_step(INJECT_FAULTS, ['data faults', dataset_len], complete=True)
 
         # Setup the configured provider/service
         client = get_client(curr_experiment, services_config)
         if client is None:
             return
 
-        print_step('Getting client for service {}', [curr_experiment['service']])
+        service = curr_experiment['service']
+        provider = curr_experiment['provider']
 
         # Perform the predictions
-        for key in exp_images:
-            print('Performing predictions ({})...'.format(key))
+        for idx, key in enumerate(exp_images):
+            is_multistep = False if idx == 0 else True
+            print_step(GET_PREDICTIONS, [key + ' ', service, provider], multistep=is_multistep)
             preds = get_predictions(curr_experiment, client, exp_images[key]['images'])
             exp_images[key]['preds'] = preds
-
-        print_step('Running service {}', [curr_experiment['service']])
-
-        # Compute the metrics for each fault
-        mrates = {}
-        base_preds = exp_images['base']['preds']
-
-        for key in exp_images:
-            if key != 'base':
-                curr_preds = exp_images[key]['preds']
-                mrate = misclassification_rate(
-                    base_preds, curr_preds, curr_experiment['metrics']['k_mrate']
-                )
-                mrates[key] = mrate
-
-        print_step('Computing metrics')
+        print_step(GET_PREDICTIONS, ['', service, provider], complete=True)
 
         # Save the experiment results
-        save_results(curr_experiment, experiment_name, mrates)
-        print_step('Saving results')
+        print_step(SAVE_RESULTS)
+        save_results(curr_experiment, experiment_name, exp_images)
+        print_step(SAVE_RESULTS, complete=True)
 
+    delete_dir(BASE_TEMP_DIR)
     print('\nAll experiments finished')
-    print('Results saved in the "results" directory')  # TODO: use exp_config['output_dir']
