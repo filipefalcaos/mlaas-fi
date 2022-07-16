@@ -1,13 +1,17 @@
-import boto3
-from botocore.exceptions import ClientError
+from boto3 import client
+from botocore.config import Config
+
+from .utils import RETRY_TIMES
 
 
 class AWSRekognition:
     def __init__(self, aws_config):
-        self.client = boto3.client(
+        config = Config(retries={'max_attempts': RETRY_TIMES, 'mode': 'standard'})
+        self.client = client(
             'rekognition',
             aws_access_key_id=aws_config['access_key_id'],
             aws_secret_access_key=aws_config['secret_access_key'],
+            config=config,
             region_name=aws_config['region_name']
         )
 
@@ -66,10 +70,7 @@ class AWSRekognition:
         for image in images:
             with open(image, 'rb') as img_file:
                 img = {'Bytes': img_file.read()}
-            try:
-                output = service_fn(img)
-                output_list.append(output)
-            except ClientError:
-                print('Unable to run {} for input image {}'.format(service, image))
+            output = service_fn(img)
+            output_list.append(output)
 
         return output_list

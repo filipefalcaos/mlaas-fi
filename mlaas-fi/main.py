@@ -15,4 +15,8 @@ if __name__ == '__main__':
     print('Found {} experiments in {}'.format(len(exp_config), EXP_CONFIG_FILE))
 
     # Launch experiments
-    launch_experiments(exp_config, services_config)
+    try:
+        launch_experiments(exp_config, services_config)
+    except BaseException as err:
+        print('\nUnexpected Error: {}, {}\n'.format(err, type(err)))
+        raise

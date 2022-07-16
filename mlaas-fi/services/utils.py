@@ -3,6 +3,9 @@ COMMON_VISION_SERVICES = [
     'LABEL_DETECTION', 'NUDITY_DETECTION', 'TEXT_DETECTION', 'VIOLENCE_DETECTION'
 ]
 
+# Default retry config
+RETRY_TIMES = 50
+
 
 # Checks if a service is a supported AWS Rekognition service
 def is_rekognition_service(service):

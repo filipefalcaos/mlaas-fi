@@ -20,12 +20,17 @@ SAVE_RESULTS = 'Saving results'
 
 
 # Prints a step (i.e., a message followed by a check mark)
-def print_step(message, parameters=[], complete=False, multistep=False):
-    end = '...          \n'  # TODO: improve spacing here
-    if multistep or complete:
+def print_step(message, parameters=[], complete=False, failed=False, multistep=False):
+    if multistep or complete or failed:
         sys.stdout.write('\033[F')
-    if complete:
-        end = ' \033[92m' + u'\u2713' + '\033[0m           \n'
+
+    # Prints '...' if incomplete or a mark otherwise
+    needs_mark = not (complete or failed)
+    mark = u'\u2714' if not failed else u'\u2718'
+    mark_color = '\033[92m' if not failed else '\033[91m'
+    end = '...' if needs_mark else ' ' + mark_color + mark + '\033[0m'
+    end = end + (' ' * 20) + '\n'
+
     print((message).format(*parameters), end=end)
 
 
@@ -78,8 +83,8 @@ def launch_experiments(exp_config, services_config):
             step_str = fault + ' (' + str(idx + 1) + '/' + str(faults_len) + ')'
             is_multistep = False if idx == 0 else True
             print_step(INJECT_FAULTS, [step_str, dataset_len], multistep=is_multistep)
-            exp_images[fault] = {'images': []}
 
+            exp_images[fault] = {'images': []}
             for image_path in exp_images['base']['images']:
                 fault_params = curr_experiment['data_faults'][fault]
 
@@ -101,13 +106,23 @@ def launch_experiments(exp_config, services_config):
 
         service = curr_experiment['service']
         provider = curr_experiment['provider']
+        exp_images_len = len(exp_images)
 
         # Perform the predictions
         for idx, key in enumerate(exp_images):
+            step_str = key + ' (' + str(idx + 1) + '/' + str(exp_images_len) + ') '
+            step_params = [step_str, service, provider]
             is_multistep = False if idx == 0 else True
-            print_step(GET_PREDICTIONS, [key + ' ', service, provider], multistep=is_multistep)
-            preds = get_predictions(curr_experiment, client, exp_images[key]['images'])
-            exp_images[key]['preds'] = preds
+            print_step(GET_PREDICTIONS, step_params, multistep=is_multistep)
+
+            # Get the predictions from service
+            try:
+                preds = get_predictions(curr_experiment, client, exp_images[key]['images'])
+                exp_images[key]['preds'] = preds
+            except BaseException:
+                print_step(GET_PREDICTIONS, step_params, failed=True, multistep=is_multistep)
+                raise
+
         print_step(GET_PREDICTIONS, ['', service, provider], complete=True)
 
         # Save the experiment results
