@@ -4,7 +4,7 @@ import random
 import sys
 import time
 
-from constants import BASE_TEMP_DIR
+from constants import DEFAULT_DATASET_DIR, DEFAULT_TEMP_DIR
 from faults import inject_fault
 from services import get_client, get_predictions
 from utils import create_dir, delete_dir, dump_json, extract_tarfile, has_key, recreate_dir
@@ -70,13 +70,12 @@ def launch_experiments(exp_config, services_config):
 
         # Get the configured dataset and set the temporary images dir
         exp_images = {'base': {}}
-        dataset_base_dir = 'datasets/'  # TODO: move to constants
-        exp_images['base']['images'] = get_experiment_data(dataset_base_dir, curr_experiment)
+        exp_images['base']['images'] = get_experiment_data(DEFAULT_DATASET_DIR, curr_experiment)
 
         dataset_len = len(exp_images['base']['images'])
         faults_len = len(curr_experiment['data_faults'])
 
-        recreate_dir(BASE_TEMP_DIR)
+        recreate_dir(DEFAULT_TEMP_DIR)
 
         # Inject data faults into the dataset
         for idx, fault in enumerate(curr_experiment['data_faults']):
@@ -91,7 +90,7 @@ def launch_experiments(exp_config, services_config):
                 # Get the temporary noisy image path
                 basename = os.path.basename(image_path)
                 image_name, extension = os.path.splitext(basename)
-                new_path = BASE_TEMP_DIR + image_name + '-' + fault + extension
+                new_path = DEFAULT_TEMP_DIR + image_name + '-' + fault + extension
 
                 # Inject the fault
                 inject_fault(image_path, new_path, fault_params, fault)
@@ -130,5 +129,5 @@ def launch_experiments(exp_config, services_config):
         save_results(curr_experiment, experiment_name, exp_images)
         print_step(SAVE_RESULTS, complete=True)
 
-    delete_dir(BASE_TEMP_DIR)
+    delete_dir(DEFAULT_TEMP_DIR)
     print('\nAll experiments finished')

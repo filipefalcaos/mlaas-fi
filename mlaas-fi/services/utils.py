@@ -4,7 +4,7 @@ COMMON_VISION_SERVICES = [
 ]
 
 # Default retry config
-RETRY_TIMES = 50
+RETRY_TIMES = 100
 
 
 # Checks if a service is a supported AWS Rekognition service
