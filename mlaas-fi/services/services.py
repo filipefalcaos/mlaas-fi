@@ -3,10 +3,10 @@ from .google_vision import GoogleVision
 from .utils import is_google_vision_service, is_rekognition_service
 
 
-# Retrieves the predictions from a service for a given set of images
-def get_predictions(exp_config, client, images):
+# Retrieves the predictions from a service for a given image
+def get_predictions(exp_config, client, image):
     service = exp_config['service']
-    predictions = client.run_service(service, images)
+    predictions = client.run_service(service, image)
     return predictions
 
 

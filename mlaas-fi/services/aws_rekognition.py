@@ -53,24 +53,19 @@ class AWSRekognition:
         celebrities_ids = celebrities_ids[:1]  # Return only a single celebrity
         return celebrities_ids
 
-    def run_service(self, service, images):
-        # Map a service to a function
-        service_fn = None
-        if service == 'CELEBRITY_RECOGNITION':
-            service_fn = self.__recognize_celebrities
-        elif service == 'LABEL_DETECTION':
-            service_fn = self.__detect_labels
-        elif service == 'NUDITY_DETECTION' or service == 'VIOLENCE_DETECTION':
-            service_fn = self.__detect_unsafe_labels
-        elif service == 'TEXT_DETECTION':
-            service_fn = self.__detect_text
+    # Run an AWS Rekognition service for a given image
+    def run_service(self, service, image):
+        # Map a service to a prediction function
+        service_map = {
+            'CELEBRITY_RECOGNITION': self.__recognize_celebrities,
+            'LABEL_DETECTION': self.__detect_labels,
+            'NUDITY_DETECTION': self.__detect_unsafe_labels,
+            'VIOLENCE_DETECTION': self.__detect_unsafe_labels,
+            'TEXT_DETECTION': self.__detect_text
+        }
 
-        # Apply the function to the given images
-        output_list = []
-        for image in images:
-            with open(image, 'rb') as img_file:
-                img = {'Bytes': img_file.read()}
-            output = service_fn(img)
-            output_list.append(output)
-
-        return output_list
+        # Apply the function to the given image
+        with open(image, 'rb') as img_file:
+            img_payload = {'Bytes': img_file.read()}
+        output = service_map[service](img_payload)
+        return output

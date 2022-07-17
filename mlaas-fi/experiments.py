@@ -7,7 +7,7 @@ import time
 from constants import DEFAULT_DATASET_DIR, DEFAULT_TEMP_DIR
 from faults import inject_fault
 from services import get_client, get_predictions
-from utils import create_dir, delete_dir, dump_json, extract_tarfile, has_key, recreate_dir
+from utils import create_dir, dump_json, extract_tarfile, has_key, recreate_dir
 
 
 random.seed(10)  # Default seed
@@ -15,7 +15,8 @@ random.seed(10)  # Default seed
 
 # Experiment steps
 INJECT_FAULTS = 'Injecting {} on {} images'
-GET_PREDICTIONS = 'Performing {}predictions using {} ({})'
+GET_BASE_PREDICTIONS = 'Performing base predictions using {} ({})'
+GET_FAULT_PREDICTIONS = 'Performing {}predictions using {} ({})'
 SAVE_RESULTS = 'Saving results'
 
 
@@ -32,6 +33,18 @@ def print_step(message, parameters=[], complete=False, failed=False, multistep=F
     end = end + (' ' * 20) + '\n'
 
     print((message).format(*parameters), end=end)
+
+
+def gen_faulty_image_path(image_name, fault, extension):
+    return DEFAULT_TEMP_DIR + image_name + '-' + fault + extension
+
+
+def get_faulty_image_path(image_path, fault=None):
+    if fault is None:
+        return image_path
+    basename = os.path.basename(image_path)
+    image_name, extension = os.path.splitext(basename)
+    return gen_faulty_image_path(image_name, fault, extension)
 
 
 # Retrieves the data for an experiment and returns a sample of it according to the experiment's
@@ -68,14 +81,12 @@ def launch_experiments(exp_config, services_config):
         curr_experiment = experiments[experiment_name]
         print('\nStarting experiment "{}"'.format(experiment_name))
 
-        # Get the configured dataset and set the temporary images dir
-        exp_images = {'base': {}}
-        exp_images['base']['images'] = get_experiment_data(DEFAULT_DATASET_DIR, curr_experiment)
-
-        dataset_len = len(exp_images['base']['images'])
-        faults_len = len(curr_experiment['data_faults'])
-
+        # Get the configured dataset and set the temp dir
+        exp_data = get_experiment_data(DEFAULT_DATASET_DIR, curr_experiment)
         recreate_dir(DEFAULT_TEMP_DIR)
+
+        dataset_len = len(exp_data)
+        faults_len = len(curr_experiment['data_faults'])
 
         # Inject data faults into the dataset
         for idx, fault in enumerate(curr_experiment['data_faults']):
@@ -83,8 +94,7 @@ def launch_experiments(exp_config, services_config):
             is_multistep = False if idx == 0 else True
             print_step(INJECT_FAULTS, [step_str, dataset_len], multistep=is_multistep)
 
-            exp_images[fault] = {'images': []}
-            for image_path in exp_images['base']['images']:
+            for image_path in exp_data:
                 fault_params = curr_experiment['data_faults'][fault]
 
                 # Get the temporary noisy image path
@@ -94,7 +104,6 @@ def launch_experiments(exp_config, services_config):
 
                 # Inject the fault
                 inject_fault(image_path, new_path, fault_params, fault)
-                exp_images[fault]['images'].append(new_path)
 
         print_step(INJECT_FAULTS, ['data faults', dataset_len], complete=True)
 
@@ -105,29 +114,48 @@ def launch_experiments(exp_config, services_config):
 
         service = curr_experiment['service']
         provider = curr_experiment['provider']
-        exp_images_len = len(exp_images)
 
-        # Perform the predictions
-        for idx, key in enumerate(exp_images):
-            step_str = key + ' (' + str(idx + 1) + '/' + str(exp_images_len) + ') '
-            step_params = [step_str, service, provider]
-            is_multistep = False if idx == 0 else True
-            print_step(GET_PREDICTIONS, step_params, multistep=is_multistep)
+        predictions = []
+        # GET BASE PREDICTIONS FIRST
 
-            # Get the predictions from service
+        for image_path in exp_data:
+            image_pred_object = {
+                'key': os.path.basename(image_path),
+                'base': [],
+                'faults': {}
+            }
+
+            # print_step(GET_BASE_PREDICTIONS, [service, provider])
             try:
-                preds = get_predictions(curr_experiment, client, exp_images[key]['images'])
-                exp_images[key]['preds'] = preds
+                preds = get_predictions(curr_experiment, client, image_path)
+                image_pred_object['base'] = preds
             except BaseException:
-                print_step(GET_PREDICTIONS, step_params, failed=True, multistep=is_multistep)
+                # print_step(GET_BASE_PREDICTIONS, [service, provider], failed=True, multistep=is_multistep)
                 raise
+            # print_step(GET_BASE_PREDICTIONS, [service, provider], complete=True)
 
-        print_step(GET_PREDICTIONS, ['', service, provider], complete=True)
+            for idx, fault in enumerate(curr_experiment['data_faults']):
+                step_str = fault + ' (' + str(idx + 1) + '/' + str(dataset_len) + ') '
+                step_params = [step_str, service, provider]
+                is_multistep = False if idx == 0 else True
+                # print_step(GET_PREDICTIONS, step_params, multistep=is_multistep)
+
+                # Get the predictions from service
+                faulty_image_path = get_faulty_image_path(image_path, fault)
+                try:
+                    preds = get_predictions(curr_experiment, client, faulty_image_path)
+                    image_pred_object['faults'][fault] = preds
+                except BaseException:
+                    # print_step(GET_PREDICTIONS, step_params, failed=True, multistep=is_multistep)
+                    raise
+
+            predictions.append(image_pred_object)
+
+        # print_step(GET_PREDICTIONS, ['', service, provider], complete=True)
 
         # Save the experiment results
         print_step(SAVE_RESULTS)
-        save_results(curr_experiment, experiment_name, exp_images)
+        save_results(curr_experiment, experiment_name, predictions)
         print_step(SAVE_RESULTS, complete=True)
 
-    delete_dir(DEFAULT_TEMP_DIR)
     print('\nAll experiments finished')

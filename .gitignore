@@ -69,7 +69,7 @@ venv.bak/
 
 ### Application files
 # Temp application directories
-/temp/
+/tmp/
 /results/
 /datasets/
 /datasets/*/
