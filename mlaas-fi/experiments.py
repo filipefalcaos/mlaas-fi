@@ -15,9 +15,8 @@ random.seed(10)  # Default seed
 
 # Experiment steps
 INJECT_FAULTS = 'Injecting {} on {} images'
-GET_BASE_PREDICTIONS = 'Performing base predictions using {} ({})'
-GET_FAULT_PREDICTIONS = 'Performing {}predictions using {} ({})'
-SAVE_RESULTS = 'Saving results'
+GET_PREDICTIONS = 'Performing predictions{}'
+SAVE_RESULTS = 'Saving experiment output'
 
 
 # Prints a step (i.e., a message followed by a check mark)
@@ -29,7 +28,7 @@ def print_step(message, parameters=[], complete=False, failed=False, multistep=F
     needs_mark = not (complete or failed)
     mark = u'\u2714' if not failed else u'\u2718'
     mark_color = '\033[92m' if not failed else '\033[91m'
-    end = '...' if needs_mark else ' ' + mark_color + mark + '\033[0m'
+    end = ' ...' if needs_mark else ' ' + mark_color + mark + '\033[0m'
     end = end + (' ' * 20) + '\n'
 
     print((message).format(*parameters), end=end)
@@ -81,8 +80,7 @@ def inject_faults(exp_data, exp_data_faults):
 
     for idx, fault in enumerate(exp_data_faults):
         step_str = fault + ' (' + str(idx + 1) + '/' + str(faults_len) + ')'
-        is_multistep = False if idx == 0 else True
-        print_step(INJECT_FAULTS, [step_str, dataset_len], multistep=is_multistep)
+        print_step(INJECT_FAULTS, [step_str, dataset_len], multistep=True)
 
         for image_path in exp_data:
             fault_params = exp_data_faults[fault]
@@ -101,12 +99,18 @@ def inject_faults(exp_data, exp_data_faults):
 # Performs the predictions (base + faulty) for all the data points in the experiment data
 def perform_predictions(curr_experiment, exp_data, service_client):
     predictions = []
-    for image_path in exp_data:
+    dataset_len = len(exp_data)
+
+    print_step(GET_PREDICTIONS, [' '])
+    for idx, image_path in enumerate(exp_data):
         image_pred_object = {
             'key': os.path.basename(image_path),
             'base': [],
             'faults': {}
         }
+
+        step_str = ' (' + str((idx + 1)) + '/' + str(dataset_len) + ')'
+        print_step(GET_PREDICTIONS, [step_str], multistep=True)
 
         # Get the base predictions
         preds = get_predictions(curr_experiment, service_client, image_path)
@@ -114,12 +118,14 @@ def perform_predictions(curr_experiment, exp_data, service_client):
 
         # Get the faulty predictions
         for idx, fault in enumerate(curr_experiment['data_faults']):
+            # print_step(GET_PREDICTIONS, [fault, service, provider], multistep=True)
             faulty_image_path = get_faulty_image_path(image_path, fault)
             preds = get_predictions(curr_experiment, service_client, faulty_image_path)
             image_pred_object['faults'][fault] = preds
 
         predictions.append(image_pred_object)
 
+    print_step(GET_PREDICTIONS, [''], complete=True)
     return predictions  # Predictions (base + faulty)
 
 
@@ -129,7 +135,7 @@ def launch_experiments(exp_config, services_config):
     experiments = exp_config['experiments']
     for experiment_name in experiments:
         curr_experiment = experiments[experiment_name]
-        print('\nStarting experiment "{}"'.format(experiment_name))
+        print('\nExperiment: "{}"\n'.format(experiment_name))
 
         # Get the configured dataset and set the temp dir
         exp_data = get_experiment_data(DEFAULT_DATASET_DIR, curr_experiment)
