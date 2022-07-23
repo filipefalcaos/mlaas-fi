@@ -5,7 +5,7 @@ from .image import *
 def inject_fault(image_path, new_image_path, params, fault):
     # Blur
     if fault == 'blur':
-        gaussian_blur(image_path, new_image_path, params['sd'])
+        gaussian_blur(image_path, new_image_path, sd=params['sd'])
     elif fault == 'motion_blur':
         motion_blur(image_path, new_image_path, severity=params['severity'])
     elif fault == 'zoom_blur':
@@ -13,9 +13,9 @@ def inject_fault(image_path, new_image_path, params, fault):
 
     # Noise
     elif fault == 'gaussian_noise':
-        gaussian_noise(image_path, new_image_path, params['sd'])
+        gaussian_noise(image_path, new_image_path, sd=params['sd'])
     elif fault == 'sp_noise':
-        sp_noise(image_path, new_image_path, params['proportion'])
+        sp_noise(image_path, new_image_path, proportion=params['proportion'])
 
     # Weather-related image faults
     elif fault == 'condensation':
@@ -29,13 +29,13 @@ def inject_fault(image_path, new_image_path, params, fault):
 
     # Others
     elif fault == 'brightness':
-        brightness_change(image_path, new_image_path, params['factor'])
+        brightness_change(image_path, new_image_path, factor=params['factor'])
     elif fault == 'chromatic_aberration':
-        chromatic_aberration(image_path, new_image_path, params['factor'])
+        chromatic_aberration(image_path, new_image_path, factor=params['factor'])
     elif fault == 'contrast':
         contrast(image_path, new_image_path, severity=params['severity'])
     elif fault == 'defective_pixels':
-        defective_pixels(image_path, new_image_path, params['proportion'], params['replace'])
+        defective_pixels(image_path, new_image_path, count=params['count'])
     elif fault == 'grayscale':
         grayscale(image_path, new_image_path)
     elif fault == 'pixelation':

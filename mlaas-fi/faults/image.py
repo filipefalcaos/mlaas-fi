@@ -119,10 +119,11 @@ def contrast(image_path, new_image_path, severity=1):
     apply_corruption(image_path, new_image_path, 'contrast', severity)
 
 
-def defective_pixels(image_path, new_image_path, proportion=0.05, replace='b'):
+def defective_pixels(image_path, new_image_path, count=1):
     img = imread(image_path)
-    noise_mode = 'salt' if replace == 'w' else 'pepper'  # Replace with white or black pixels
-    img_noise = img_as_ubyte(random_noise(img, mode=noise_mode, clip=True, amount=proportion))
+    total_pixels = img.shape[0] * img.shape[1]
+    proportion = count / total_pixels
+    img_noise = img_as_ubyte(random_noise(img, mode='pepper', clip=True, amount=proportion))
     imsave(new_image_path, img_noise)
 
 
