@@ -34,10 +34,10 @@ def inject_fault(image_path, new_image_path, params, fault):
         chromatic_aberration(image_path, new_image_path, params['factor'])
     elif fault == 'contrast':
         contrast(image_path, new_image_path, severity=params['severity'])
+    elif fault == 'defective_pixels':
+        defective_pixels(image_path, new_image_path, params['proportion'], params['replace'])
     elif fault == 'grayscale':
         grayscale(image_path, new_image_path)
-    elif fault == 'missing_pixels':
-        missing_pixels(image_path, new_image_path, params['proportion'], params['replace'])
     elif fault == 'pixelation':
         pixelation(image_path, new_image_path, severity=params['severity'])
 

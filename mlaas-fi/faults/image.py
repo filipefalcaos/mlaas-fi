@@ -119,17 +119,17 @@ def contrast(image_path, new_image_path, severity=1):
     apply_corruption(image_path, new_image_path, 'contrast', severity)
 
 
-def grayscale(image_path, new_image_path):
-    img = imread(image_path)
-    img_grayscale = img_as_ubyte(rgb2gray(img))
-    imsave(new_image_path, img_grayscale)
-
-
-def missing_pixels(image_path, new_image_path, proportion=0.05, replace='b'):
+def defective_pixels(image_path, new_image_path, proportion=0.05, replace='b'):
     img = imread(image_path)
     noise_mode = 'salt' if replace == 'w' else 'pepper'  # Replace with white or black pixels
     img_noise = img_as_ubyte(random_noise(img, mode=noise_mode, clip=True, amount=proportion))
     imsave(new_image_path, img_noise)
+
+
+def grayscale(image_path, new_image_path):
+    img = imread(image_path)
+    img_grayscale = img_as_ubyte(rgb2gray(img))
+    imsave(new_image_path, img_grayscale)
 
 
 def pixelation(image_path, new_image_path, severity=1):
