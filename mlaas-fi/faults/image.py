@@ -40,7 +40,7 @@ def fog(image_path, new_image_path, severity=1):
 
 
 def frost(image_path, new_image_path):
-    apply_img_corruption(image_path, new_image_path, 'frost')
+    apply_weather_mask(image_path, new_image_path, 'frost')
 
 
 def rain_snow(image_path, new_image_path, severity=1):
@@ -48,7 +48,7 @@ def rain_snow(image_path, new_image_path, severity=1):
 
 
 def brightness(image_path, new_image_path, severity=1):
-    apply_img_corruption(image_path, new_image_path, 'snow', severity)
+    apply_img_corruption(image_path, new_image_path, 'brightness', severity)
 
 
 # Implements simple chromatic aberration by altering the g and b channels of the image
