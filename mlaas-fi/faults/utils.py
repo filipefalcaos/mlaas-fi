@@ -5,21 +5,12 @@ from PIL import Image
 from pkg_resources import resource_filename
 
 
+# Helper function for imagecorruptions
 def apply_img_corruption(image_path, new_image_path, corruption, severity):
     img = np.asarray(Image.open(image_path))
     img_corrupt = corrupt(img, corruption_name=corruption, severity=severity)
     img_corrupt = Image.fromarray(img_corrupt)
     img_corrupt.save(new_image_path)
-
-
-def apply_corruptions(image_path, new_image_path, corruption, severity=None):
-    default_parameters = [1, 2, 3, 4, 5]  # Default severity parameters
-
-    if severity is not None:
-        apply_img_corruption(image_path, new_image_path, corruption, severity)
-    else:
-        for param in default_parameters:
-            apply_img_corruption(image_path, new_image_path, corruption, param)
 
 
 # Masks from:

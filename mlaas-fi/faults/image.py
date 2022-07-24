@@ -6,57 +6,49 @@ from skimage.color import rgb2gray
 from skimage.io import imsave, imread
 from skimage.util import img_as_ubyte, random_noise
 
-from .utils import apply_corruptions, apply_weather_mask
+from .utils import apply_img_corruption, apply_weather_mask
 
 
-##### BLUR #####
-
-def gaussian_blur(image_path, new_image_path, severity=None):
+def gaussian_blur(image_path, new_image_path, severity=1):
     with warnings.catch_warnings():
         warnings.simplefilter(action='ignore', category=FutureWarning)
-        apply_corruptions(image_path, new_image_path, 'gaussian_blur', severity)
+        apply_img_corruption(image_path, new_image_path, 'gaussian_blur', severity)
 
 
-def motion_blur(image_path, new_image_path, severity=None):
-    apply_corruptions(image_path, new_image_path, 'motion_blur', severity)
+def motion_blur(image_path, new_image_path, severity=1):
+    apply_img_corruption(image_path, new_image_path, 'motion_blur', severity)
 
 
-def zoom_blur(image_path, new_image_path, severity=None):
-    apply_corruptions(image_path, new_image_path, 'zoom_blur', severity)
+def zoom_blur(image_path, new_image_path, severity=1):
+    apply_img_corruption(image_path, new_image_path, 'zoom_blur', severity)
 
 
-##### NOISE #####
-
-def gaussian_noise(image_path, new_image_path, severity=None):
-    apply_corruptions(image_path, new_image_path, 'gaussian_noise', severity)
+def gaussian_noise(image_path, new_image_path, severity=1):
+    apply_img_corruption(image_path, new_image_path, 'gaussian_noise', severity)
 
 
-def sp_noise(image_path, new_image_path, severity=None):
-    apply_corruptions(image_path, new_image_path, 'impulse_noise', severity)
+def sp_noise(image_path, new_image_path, severity=1):
+    apply_img_corruption(image_path, new_image_path, 'impulse_noise', severity)
 
-
-##### CLIMATE FAULTS #####
 
 def condensation(image_path, new_image_path):
     apply_weather_mask(image_path, new_image_path, 'condensation')
 
 
-def fog(image_path, new_image_path, severity=None):
-    apply_corruptions(image_path, new_image_path, 'fog', severity)
+def fog(image_path, new_image_path, severity=1):
+    apply_img_corruption(image_path, new_image_path, 'fog', severity)
 
 
 def frost(image_path, new_image_path):
-    apply_weather_mask(image_path, new_image_path, 'frost')
+    apply_img_corruption(image_path, new_image_path, 'frost')
 
 
-def rain_snow(image_path, new_image_path, severity=None):
-    apply_corruptions(image_path, new_image_path, 'snow', severity)
+def rain_snow(image_path, new_image_path, severity=1):
+    apply_img_corruption(image_path, new_image_path, 'snow', severity)
 
 
-##### OTHERS #####
-
-def brightness(image_path, new_image_path, severity=None):
-    apply_corruptions(image_path, new_image_path, 'snow', severity)
+def brightness(image_path, new_image_path, severity=1):
+    apply_img_corruption(image_path, new_image_path, 'snow', severity)
 
 
 # Implements simple chromatic aberration by altering the g and b channels of the image
@@ -91,8 +83,8 @@ def chromatic_aberration(image_path, new_image_path, factor=1):
     new_img.save(new_image_path)
 
 
-def contrast(image_path, new_image_path, severity=None):
-    apply_corruptions(image_path, new_image_path, 'contrast', severity)
+def contrast(image_path, new_image_path, severity=1):
+    apply_img_corruption(image_path, new_image_path, 'contrast', severity)
 
 
 def defective_pixels(image_path, new_image_path, count=1):
@@ -109,5 +101,5 @@ def grayscale(image_path, new_image_path):
     imsave(new_image_path, img_grayscale)
 
 
-def pixelation(image_path, new_image_path, severity=None):
-    apply_corruptions(image_path, new_image_path, 'pixelate', severity)
+def pixelation(image_path, new_image_path, severity=1):
+    apply_img_corruption(image_path, new_image_path, 'pixelate', severity)

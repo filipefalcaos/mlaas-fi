@@ -41,7 +41,7 @@ def parse_json(path):
 # Dumps given data into a JSON file
 def dump_json(path, data):
     with open(path, 'w') as outfile:
-        json.dump(data, outfile, indent=2)
+        json.dump(data, outfile)
 
 
 # Checks wether a dict has a given key
