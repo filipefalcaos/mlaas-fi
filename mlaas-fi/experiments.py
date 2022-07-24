@@ -83,15 +83,13 @@ def inject_faults(exp_data, exp_data_faults):
         print_step(INJECT_FAULTS, [step_str, dataset_len], multistep=True)
 
         for image_path in exp_data:
-            fault_params = exp_data_faults[fault]
-
             # Get the temporary noisy image path
             basename = os.path.basename(image_path)
             image_name, extension = os.path.splitext(basename)
             new_path = DEFAULT_TEMP_DIR + image_name + '-' + fault + extension
 
             # Inject the fault
-            inject_fault(image_path, new_path, fault_params, fault)
+            inject_fault(image_path, new_path, fault)
 
     print_step(INJECT_FAULTS, ['data faults', dataset_len], complete=True)
 
