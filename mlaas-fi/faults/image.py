@@ -54,7 +54,7 @@ def brightness(image_path, new_image_path, severity=1):
 # Implements simple chromatic aberration by altering the g and b channels of the image
 # Modification of https://github.com/yoonsikp/kromo
 def chromatic_aberration(image_path, new_image_path, factor=1):
-    img = Image.open(image_path)
+    img = Image.open(image_path).convert('RGB')
 
     r, g, b = img.split()
     rdata = np.asarray(r)
@@ -96,9 +96,8 @@ def defective_pixels(image_path, new_image_path, count=1):
 
 
 def grayscale(image_path, new_image_path):
-    img = imread(image_path)
-    img_grayscale = img_as_ubyte(rgb2gray(img))
-    imsave(new_image_path, img_grayscale)
+    img = Image.open(image_path).convert('L')
+    img.save(new_image_path)
 
 
 def pixelation(image_path, new_image_path, severity=1):

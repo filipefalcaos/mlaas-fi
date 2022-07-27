@@ -18,7 +18,7 @@ def apply_img_corruption(image_path, new_image_path, corruption, severity):
 # - Frost: https://github.com/bethgelab/imagecorruptions
 def apply_weather_mask(image_path, new_image_path, condition):
     mask_path = resource_filename(__name__, './masks/' + condition + '.jpeg')
-    img = Image.open(image_path)
+    img = Image.open(image_path).convert('RGB')
     img_mask = Image.open(mask_path).convert('RGB').resize(img.size)
     img_blend = Image.blend(img, img_mask, alpha=0.4)
     img_blend.save(new_image_path)
