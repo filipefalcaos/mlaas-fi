@@ -53,6 +53,7 @@ def get_experiment_data(dataset_base_dir, exp_config):
     # Extract the dataset content - works recursively
     extract_tarfile(dataset + '.tar.gz', dataset_base_dir)
     dataset_images = glob.glob(dataset + '/**/*.jpg', recursive=True)
+    dataset_images += glob.glob(dataset + '/**/*.JPG', recursive=True)
 
     # Set the random dataset sample
     if has_key(exp_config, 'n_samples'):
@@ -82,18 +83,22 @@ def inject_faults(exp_data, exp_data_faults):
         step_str = fault_name + ' (' + str(idx + 1) + '/' + str(faults_len) + ')'
         print_step(INJECT_FAULTS, [step_str, dataset_len], multistep=True)
 
-        for image_path in exp_data:
-            if not has_key(fault, 'parameter'):
-                new_path = gen_faulty_image_path(image_path, fault_name)
-                inject_fault(image_path, new_path, fault_name)  # Inject the fault
-            else:
-                fault_param = fault['parameter']
-                for param_value in fault_param['values']:
-                    # Inject the fault w/ parameter
-                    new_path = gen_faulty_image_path(
-                        image_path, fault_name, fault_param['name'], param_value
-                    )
-                    inject_fault(image_path, new_path, fault_name, param_value)
+        try:
+            for image_path in exp_data:
+                if not has_key(fault, 'parameter'):
+                    new_path = gen_faulty_image_path(image_path, fault_name)
+                    inject_fault(image_path, new_path, fault_name)  # Inject the fault
+                else:
+                    fault_param = fault['parameter']
+                    for param_value in fault_param['values']:
+                        # Inject the fault w/ parameter
+                        new_path = gen_faulty_image_path(
+                            image_path, fault_name, fault_param['name'], param_value
+                        )
+                        inject_fault(image_path, new_path, fault_name, param_value)
+        except BaseException:
+            print('Failed to inject fault {} on {}'.format(fault_name, image_path))
+            raise
 
     print_step(INJECT_FAULTS, ['data faults', dataset_len], complete=True)
 
@@ -114,27 +119,31 @@ def perform_predictions(curr_experiment, exp_data, service_client):
         step_str = ' (' + str((idx + 1)) + '/' + str(dataset_len) + ')'
         print_step(GET_PREDICTIONS, [step_str], multistep=True)
 
-        # Get the base predictions
-        preds = get_predictions(curr_experiment, service_client, image_path)
-        image_pred_object['base'] = preds
+        try:
+            # Get the base predictions
+            preds = get_predictions(curr_experiment, service_client, image_path)
+            image_pred_object['base'] = preds
 
-        # Get the faulty predictions
-        for idx, fault in enumerate(curr_experiment['data_faults']):
-            fault_name = fault['name']
+            # Get the faulty predictions
+            for idx, fault in enumerate(curr_experiment['data_faults']):
+                fault_name = fault['name']
 
-            if not has_key(fault, 'parameter'):
-                faulty_image_path = gen_faulty_image_path(image_path, fault_name)
-                preds = get_predictions(curr_experiment, service_client, faulty_image_path)
-                image_pred_object['faults'][fault_name] = preds
-            else:
-                fault_param = fault['parameter']
-                for param_value in fault_param['values']:
-                    faulty_image_path = gen_faulty_image_path(
-                        image_path, fault_name, fault_param['name'], param_value
-                    )
+                if not has_key(fault, 'parameter'):
+                    faulty_image_path = gen_faulty_image_path(image_path, fault_name)
                     preds = get_predictions(curr_experiment, service_client, faulty_image_path)
-                    fault_key = fault_name + '-' + fault_param['name'] + '_' + str(param_value)
-                    image_pred_object['faults'][fault_key] = preds
+                    image_pred_object['faults'][fault_name] = preds
+                else:
+                    fault_param = fault['parameter']
+                    for param_value in fault_param['values']:
+                        faulty_image_path = gen_faulty_image_path(
+                            image_path, fault_name, fault_param['name'], param_value
+                        )
+                        preds = get_predictions(curr_experiment, service_client, faulty_image_path)
+                        fault_key = fault_name + '-' + fault_param['name'] + '_' + str(param_value)
+                        image_pred_object['faults'][fault_key] = preds
+        except BaseException:
+            print('Failed to get predictions for image {}'.format(image_path))
+            raise
 
         predictions.append(image_pred_object)
 
