@@ -2,7 +2,6 @@ import warnings
 import numpy as np
 
 from PIL import Image
-from skimage.color import rgb2gray
 from skimage.io import imsave, imread
 from skimage.util import img_as_ubyte, random_noise
 
