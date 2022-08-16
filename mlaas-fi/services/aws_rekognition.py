@@ -5,7 +5,7 @@ from .utils import RETRY_TIMES
 
 
 # Default labels for nudity and violence
-NUDITY_LABELS = ['Explicit Nudity']
+NUDITY_LABELS = ['Explicit Nudity', 'Suggestive']
 VIOLENCE_LABELS = ['Violence', 'Visually Disturbing']
 
 
@@ -28,7 +28,7 @@ class AWSRekognition:
         label_names = [response_label['Name'] for response_label in response_labels]
         return label_names
 
-    # Detects nudity (label 'Explicit Nudity') in an image
+    # Detects adult and suggestive content in an image
     # Leveraged API: detect_moderation_labels from boto3
     def __detect_nudity(self, img):
         return self.__detect_unsafe_labels(img, unsafe_labels=NUDITY_LABELS)
