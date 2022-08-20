@@ -20,6 +20,13 @@ class AWSRekognition:
             region_name=aws_config['region_name']
         )
 
+    # Detects faces in an image, assuming a single face is present per image
+    # Leveraged API: detect_faces from boto3
+    def __detect_faces(self, img):
+        response = self.client.detect_faces(Image=img)
+        response_faces_n = len(response['FaceDetails'])
+        return ['detected'] if response_faces_n else ['not-detected']
+
     # Labels objects detected in an image
     # Leveraged API: detect_labels from boto3
     def __detect_labels(self, img):
@@ -76,6 +83,7 @@ class AWSRekognition:
         # Map a service to a prediction function
         service_map = {
             'CELEBRITY_RECOGNITION': self.__recognize_celebrities,
+            'FACE_DETECTION': self.__detect_faces,
             'LABEL_DETECTION': self.__detect_labels,
             'NUDITY_DETECTION': self.__detect_nudity,
             'VIOLENCE_DETECTION': self.__detect_violence,

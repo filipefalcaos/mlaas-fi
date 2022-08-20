@@ -4,7 +4,7 @@ import requests
 
 # Common vision services across all supported providers
 COMMON_VISION_SERVICES = [
-    'LABEL_DETECTION', 'NUDITY_DETECTION', 'TEXT_DETECTION'
+    'FACE_DETECTION', 'LABEL_DETECTION', 'NUDITY_DETECTION', 'TEXT_DETECTION'
 ]
 
 # Default retry config
