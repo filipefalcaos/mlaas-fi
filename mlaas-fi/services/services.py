@@ -12,16 +12,16 @@ def get_predictions(exp_config, client, image):
 
 
 # Retrieves the client to invoke a machine learning cloud service
-def get_client(exp_config, services_config):
+def get_client(exp_config, providers_config):
     provider = exp_config['provider']
     service = exp_config['service']
 
     if provider == 'AWS' and is_rekognition_service(service):
-        return AWSRekognition(services_config['providers']['AWS'])
+        return AWSRekognition(providers_config['providers']['AWS'])
     elif provider == 'GOOGLE_CLOUD' and is_google_vision_service(service):
         return GoogleVision()
     elif provider == 'MSFT_AZURE' and is_azure_vision_service(service):
-        return MSFTVision(services_config['providers']['MSFT_AZURE'])
+        return MSFTVision(providers_config['providers']['MSFT_AZURE'])
     else:
         print('Unsupported combination of provider ({}) and service ({})'.format(provider, service))
         return None

@@ -153,14 +153,14 @@ def perform_predictions(curr_experiment, exp_data, service_client):
 
 # Launches the configured fault injection experiments. Experiments are launched in the order they
 # are defined in the experiments configuration file
-def launch_experiments(exp_config, services_config):
+def launch_experiments(exp_config, providers_config):
     experiments = exp_config['experiments']
     for experiment_name in experiments:
         curr_experiment = experiments[experiment_name]
         print('\nExperiment: "{}"\n'.format(experiment_name))
 
         # Setup the configured provider/service
-        service_client = get_client(curr_experiment, services_config)
+        service_client = get_client(curr_experiment, providers_config)
         if service_client is None:
             return
 

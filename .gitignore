@@ -76,7 +76,7 @@ venv.bak/
 
 # User-specific configuration files
 exp.config.json
-services.config.json
+providers.config.json
 .vscode
 
 # MacOS dirty little file
