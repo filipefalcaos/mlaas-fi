@@ -6,11 +6,9 @@ import time
 
 from constants import DEFAULT_DATASET_DIR, DEFAULT_TEMP_DIR
 from faults import inject_fault
+from mitigations import apply_mitigation
 from services import get_client, get_predictions
 from utils import create_dir, dump_json, extract_tarfile, has_key, recreate_dir
-
-
-random.seed(10)  # Default seed
 
 
 # Experiment steps
@@ -55,10 +53,6 @@ def get_experiment_data(dataset_base_dir, exp_config):
     dataset_images = glob.glob(dataset + '/**/*.jpg', recursive=True)
     dataset_images += glob.glob(dataset + '/**/*.JPG', recursive=True)
 
-    # Set the random dataset sample
-    if has_key(exp_config, 'n_samples'):
-        dataset_images = random.sample(dataset_images, exp_config['n_samples'])
-
     return dataset_images
 
 
@@ -101,6 +95,20 @@ def inject_faults(exp_data, exp_data_faults):
             raise
 
     print_step(INJECT_FAULTS, ['data faults', dataset_len], complete=True)
+
+
+# Applies a random mitigation for each faulty image
+def apply_mitigations(mitigations):
+    if (not len(mitigations)):
+        return
+
+    faulty_images = glob.glob(DEFAULT_TEMP_DIR + '*', recursive=True)
+    secure_random = random.SystemRandom()
+
+    # Apply random mitigations to faulty images
+    for faulty_image in faulty_images:
+        random_mitigation = secure_random.choice(mitigations)
+        apply_mitigation(faulty_image, random_mitigation)
 
 
 # Performs the predictions (base + faulty) for all the data points in the experiment data
@@ -170,6 +178,9 @@ def launch_experiments(exp_config, providers_config):
 
         # Inject data faults into the dataset
         inject_faults(exp_data, curr_experiment['data_faults'])
+
+        if has_key(curr_experiment, 'mitigations'):
+            apply_mitigations(curr_experiment['mitigations'])
 
         # Get the base and faulty predictions from service
         predictions = perform_predictions(curr_experiment, exp_data, service_client)
