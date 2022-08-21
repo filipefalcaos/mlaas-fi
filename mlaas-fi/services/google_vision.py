@@ -10,6 +10,14 @@ class GoogleVision:
     def __init__(self):
         self.client = vision.ImageAnnotatorClient()
 
+    # Detects faces in an image, assuming a single face is present per image
+    # Leveraged API: face_detection from google.cloud.vision
+    def __detect_faces(self, img):
+        image = vision.Image(content=img)
+        response = self.client.face_detection(image=image)
+        response_faces_n = len(response.face_annotations)
+        return ['detected'] if response_faces_n else ['not-detected']
+
     # Labels objects detected in an image
     # Leveraged API: label_detection from google.cloud.vision
     def __detect_labels(self, img):
@@ -61,6 +69,7 @@ class GoogleVision:
     def run_service(self, service, image):
         # Map a service to a prediction function
         service_map = {
+            'FACE_DETECTION': self.__detect_faces,
             'LABEL_DETECTION': self.__detect_labels,
             'NUDITY_DETECTION': self.__detect_nudity,
             'VIOLENCE_DETECTION': self.__detect_violence,
