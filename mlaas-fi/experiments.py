@@ -3,6 +3,7 @@ import os
 import random
 import sys
 import time
+import warnings
 
 from constants import DEFAULT_DATASET_DIR, DEFAULT_TEMP_DIR
 from faults import inject_fault
@@ -111,7 +112,9 @@ def apply_mitigations(mitigations):
         step_str = ' (' + str(idx) + '/' + str(faulty_images_len) + ')'
         print_step(APPLY_MITIGATIONS, [step_str], multistep=True)
         random_mitigation = secure_random.choice(mitigations)
-        apply_mitigation(faulty_image, random_mitigation)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', category=RuntimeWarning)
+            apply_mitigation(faulty_image, random_mitigation)
 
     print_step(APPLY_MITIGATIONS, [''], complete=True)
 
