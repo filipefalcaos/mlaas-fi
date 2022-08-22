@@ -13,13 +13,13 @@ from utils import create_dir, dump_json, extract_tarfile, has_key, recreate_dir
 
 # Experiment steps
 INJECT_FAULTS = '  Injecting {} on {} images'
-APPLY_MITIGATIONS = '  Applying mitigations'
+APPLY_MITIGATIONS = '  Applying mitigations to faulty images{}'
 GET_PREDICTIONS = '  Performing predictions{}'
 SAVE_RESULTS = '  Saving experiment output'
 
 
 # Prints a step (i.e., a message followed by a check mark)
-def print_step(message, parameters=[], complete=False, multistep=False):
+def print_step(message, parameters=[], complete=False, multistep=False, extra_end=''):
     if multistep or complete:
         sys.stdout.write('\033[F')
 
@@ -27,7 +27,7 @@ def print_step(message, parameters=[], complete=False, multistep=False):
     mark = u'\u2714'
     mark_color = '\033[92m'
     end = ' ...' if not complete else ' ' + mark_color + mark + '\033[0m'
-    end = end + (' ' * 20) + '\n'
+    end = end + (' ' * 20) + '\n' + extra_end
 
     print((message).format(*parameters), end=end)
 
@@ -94,7 +94,7 @@ def inject_faults(exp_data, exp_data_faults):
             print('Failed to inject fault {} on {}'.format(fault_name, image_path))
             raise
 
-    print_step(INJECT_FAULTS, ['data faults', dataset_len], complete=True)
+    print_step(INJECT_FAULTS, ['data faults', dataset_len], complete=True, extra_end='\n')
 
 
 # Applies a random mitigation for each faulty image
@@ -103,15 +103,17 @@ def apply_mitigations(mitigations):
         return
 
     faulty_images = glob.glob(DEFAULT_TEMP_DIR + '*', recursive=True)
+    faulty_images_len = len(faulty_images)
     secure_random = random.SystemRandom()
-    print_step(APPLY_MITIGATIONS)
 
     # Apply random mitigations to faulty images
-    for faulty_image in faulty_images:
+    for idx, faulty_image in enumerate(faulty_images):
+        step_str = ' (' + str(idx) + '/' + str(faulty_images_len) + ')'
+        print_step(APPLY_MITIGATIONS, [step_str], multistep=True)
         random_mitigation = secure_random.choice(mitigations)
         apply_mitigation(faulty_image, random_mitigation)
 
-    print_step(APPLY_MITIGATIONS, complete=True)
+    print_step(APPLY_MITIGATIONS, [''], complete=True)
 
 
 # Performs the predictions (base + faulty) for all the data points in the experiment data
