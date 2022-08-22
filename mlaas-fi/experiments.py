@@ -12,21 +12,21 @@ from utils import create_dir, dump_json, extract_tarfile, has_key, recreate_dir
 
 
 # Experiment steps
-INJECT_FAULTS = 'Injecting {} on {} images'
-GET_PREDICTIONS = 'Performing predictions{}'
-SAVE_RESULTS = 'Saving experiment output'
+INJECT_FAULTS = '  Injecting {} on {} images'
+APPLY_MITIGATIONS = '  Applying mitigations'
+GET_PREDICTIONS = '  Performing predictions{}'
+SAVE_RESULTS = '  Saving experiment output'
 
 
 # Prints a step (i.e., a message followed by a check mark)
-def print_step(message, parameters=[], complete=False, failed=False, multistep=False):
-    if multistep or complete or failed:
+def print_step(message, parameters=[], complete=False, multistep=False):
+    if multistep or complete:
         sys.stdout.write('\033[F')
 
     # Prints '...' if incomplete or a mark otherwise
-    needs_mark = not (complete or failed)
-    mark = u'\u2714' if not failed else u'\u2718'
-    mark_color = '\033[92m' if not failed else '\033[91m'
-    end = ' ...' if needs_mark else ' ' + mark_color + mark + '\033[0m'
+    mark = u'\u2714'
+    mark_color = '\033[92m'
+    end = ' ...' if not complete else ' ' + mark_color + mark + '\033[0m'
     end = end + (' ' * 20) + '\n'
 
     print((message).format(*parameters), end=end)
@@ -104,11 +104,14 @@ def apply_mitigations(mitigations):
 
     faulty_images = glob.glob(DEFAULT_TEMP_DIR + '*', recursive=True)
     secure_random = random.SystemRandom()
+    print_step(APPLY_MITIGATIONS)
 
     # Apply random mitigations to faulty images
     for faulty_image in faulty_images:
         random_mitigation = secure_random.choice(mitigations)
         apply_mitigation(faulty_image, random_mitigation)
+
+    print_step(APPLY_MITIGATIONS, complete=True)
 
 
 # Performs the predictions (base + faulty) for all the data points in the experiment data
@@ -165,7 +168,7 @@ def launch_experiments(exp_config, providers_config):
     experiments = exp_config['experiments']
     for experiment_name in experiments:
         curr_experiment = experiments[experiment_name]
-        print('\nExperiment: "{}"\n'.format(experiment_name))
+        print('\n- Experiment: "{}"\n'.format(experiment_name))
 
         # Setup the configured provider/service
         service_client = get_client(curr_experiment, providers_config)
