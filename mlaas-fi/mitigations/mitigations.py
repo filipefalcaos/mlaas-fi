@@ -1,6 +1,7 @@
 from .image import *
 
 
+# Applies a mitigation technique to a given image
 def apply_mitigation(image_path, mitigation):
     if mitigation == 'bit_depth_reduction':
         bit_depth_reduction(image_path)
