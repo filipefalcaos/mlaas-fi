@@ -1,8 +1,9 @@
-import csv
 import json
 import os
 import shutil
 import tarfile
+
+from PIL import Image
 
 
 # Creates a directory in a given path if not existent
@@ -11,7 +12,12 @@ def create_dir(dir_path):
         os.makedirs(dir_path)
 
 
-# Recreate a directory if it already exists
+# Deletes a directory
+def delete_dir(dir_path):
+    shutil.rmtree(dir_path)
+
+
+# Recreates a directory if it already exists
 def recreate_dir(dir_path):
     if os.path.exists(dir_path):
         shutil.rmtree(dir_path)
@@ -35,24 +41,9 @@ def parse_json(path):
 # Dumps given data into a JSON file
 def dump_json(path, data):
     with open(path, 'w') as outfile:
-        json.dump(data, outfile, indent=2)
+        json.dump(data, outfile)
 
 
-# Parses the AWS credentials from a CSV file
-def parse_aws_credentials(path):
-    credentials = {}
-    with open(path, 'r') as cred_csv:
-        next(cred_csv)
-        reader = csv.reader(cred_csv)
-        for row in reader:
-            credentials['access_key_id'] = row[2]
-            credentials['secret_access_key'] = row[3]
-
-    return credentials
-
-
-# Checks if a service is an AWS Rekognition service
-def is_rekognition_service(service):
-    rekognition_services = ["CELEBRITY_RECOGNITION", "LABEL_DETECTION",
-                            "NUDITY_DETECTION", "TEXT_DETECTION", "VIOLENCE_DETECTION"]
-    return service in rekognition_services
+# Checks wether a dict has a given key
+def has_key(dict, key):
+    return key in dict

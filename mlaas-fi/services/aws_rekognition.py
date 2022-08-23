@@ -1,91 +1,97 @@
-import boto3
-from botocore.exceptions import ClientError
-from utils import parse_aws_credentials
+from boto3 import client
+from botocore.config import Config
+
+from .utils import RETRY_TIMES
+
+
+# Default labels for nudity and violence
+NUDITY_LABELS = ['Explicit Nudity', 'Suggestive']
+VIOLENCE_LABELS = ['Violence', 'Visually Disturbing']
 
 
 class AWSRekognition:
-    def __init__(self, credentials_file):
-        self.credentials = parse_aws_credentials(credentials_file)
-        self.client = boto3.client(
+    def __init__(self, aws_config):
+        config = Config(retries={'max_attempts': RETRY_TIMES, 'mode': 'standard'})
+        self.client = client(
             'rekognition',
-            aws_access_key_id=self.credentials['access_key_id'],
-            aws_secret_access_key=self.credentials['secret_access_key'],
-            region_name='us-east-2'
+            aws_access_key_id=aws_config['access_key_id'],
+            aws_secret_access_key=aws_config['secret_access_key'],
+            config=config,
+            region_name=aws_config['region_name']
         )
 
+    # Detects faces in an image, assuming a single face is present per image
+    # Leveraged API: detect_faces from boto3
+    def __detect_faces(self, img):
+        response = self.client.detect_faces(Image=img)
+        response_faces_n = len(response['FaceDetails'])
+        return ['detected'] if response_faces_n else ['not-detected']
 
-    # Uses the "detect_labels" API from boto3 (Amazon Rekognition) to detect the labels in a list
-    # of images
-    def detect_labels(self, imgs_paths):
-        labels = []
-        for img_path in imgs_paths:
-            with open(img_path, 'rb') as img_file:
-                img = {'Bytes': img_file.read()}
+    # Labels objects detected in an image
+    # Leveraged API: detect_labels from boto3
+    def __detect_labels(self, img):
+        response = self.client.detect_labels(Image=img)
+        response_labels = response['Labels']
+        label_names = [response_label['Name'] for response_label in response_labels]
+        return label_names
 
-            try:
-                response = self.client.detect_labels(Image=img)
-                response_labels = response['Labels']
-                label_names = [response_label['Name'] for response_label in response_labels]
-                labels.append(label_names)
-            except ClientError:
-                raise
+    # Detects adult and suggestive content in an image
+    # Leveraged API: detect_moderation_labels from boto3
+    def __detect_nudity(self, img):
+        return self.__detect_unsafe_labels(img, unsafe_labels=NUDITY_LABELS)
 
-        return labels
+    # Detects text occurrences (lines only) in an image
+    # Leveraged API: detect_text from boto3
+    def __detect_text(self, img):
+        response = self.client.detect_text(Image=img)
+        response_texts = response['TextDetections']
+        texts_content = [
+            resp_text['DetectedText'] for resp_text in response_texts if resp_text['Type'] == 'LINE'
+        ]
+        return texts_content
 
+    # Detects unsafe content, defined by the unsafe_labels parameter, in an image
+    # Supported unsafe labels: explicit nudity, suggestive, violence, visually disturbing, rude
+    #                          gestures, drugs, tobacco, alcohol, gambling, hate symbols
+    # Leveraged API: detect_moderation_labels from boto3
+    def __detect_unsafe_labels(self, img, unsafe_labels=None):
+        response = self.client.detect_moderation_labels(Image=img)
+        response_labels = response['ModerationLabels']
+        label_names = [
+            resp_label['Name'] for resp_label in response_labels if unsafe_labels is not None and (
+                resp_label['Name'] in unsafe_labels or resp_label['ParentName'] in unsafe_labels
+            )
+        ]
+        return label_names
 
-    # Uses the "detect_text" API from boto3 (Amazon Rekognition) to detect text occurrence (lines
-    # only) in a list of images
-    def detect_text(self, imgs_paths):
-        texts = []
-        for img_path in imgs_paths:
-            with open(img_path, 'rb') as img_file:
-                img = {'Bytes': img_file.read()}
+    # Detects violence (labels 'Violence', 'Visually Disturbing') in an image
+    # Leveraged API: detect_moderation_labels from boto3
+    def __detect_violence(self, img):
+        return self.__detect_unsafe_labels(img, unsafe_labels=VIOLENCE_LABELS)
 
-            try:
-                response = self.client.detect_text(Image=img)
-                response_texts = response['TextDetections']
-                texts_content = [resp_text['DetectedText'] for resp_text in response_texts if resp_text['Type'] == 'LINE']
-                texts.append(texts_content)
-            except ClientError:
-                raise
+    # Recognizes a single celebrity in an image (other celebrities found are not returned)
+    # Leveraged API: recognize_celebrities from boto3
+    def __recognize_celebrities(self, img):
+        response = self.client.recognize_celebrities(Image=img)
+        response_celebrities = response['CelebrityFaces']
+        celebrities_ids = [resp_celebrity['Name'] for resp_celebrity in response_celebrities]
+        celebrities_ids = celebrities_ids[:1]  # Return only a single celebrity
+        return celebrities_ids
 
-        return texts
+    # Run an AWS Rekognition service for a given image
+    def run_service(self, service, image):
+        # Map a service to a prediction function
+        service_map = {
+            'CELEBRITY_RECOGNITION': self.__recognize_celebrities,
+            'FACE_DETECTION': self.__detect_faces,
+            'LABEL_DETECTION': self.__detect_labels,
+            'NUDITY_DETECTION': self.__detect_nudity,
+            'VIOLENCE_DETECTION': self.__detect_violence,
+            'TEXT_DETECTION': self.__detect_text
+        }
 
-
-    # Uses the "detect_moderation_labels" API from boto3 (Amazon Rekognition) to detect unsafe
-    # content in a list of images
-    def detect_unsafe_labels(self, imgs_paths):
-        labels = []
-        for img_path in imgs_paths:
-            with open(img_path, 'rb') as img_file:
-                img = {'Bytes': img_file.read()}
-
-            try:
-                response = self.client.detect_moderation_labels(Image=img)
-                response_labels = response['ModerationLabels']
-                label_names = [response_label['Name'] for response_label in response_labels]
-                labels.append(label_names)
-            except ClientError:
-                raise
-
-        return labels
-
-
-    # Uses the "recognize_celebrities" API from boto3 (Amazon Rekognition) to recognize celebrities
-    # in a list of images
-    def recognize_celebrities(self, imgs_paths):
-        celebrities = []
-        for img_path in imgs_paths:
-            with open(img_path, 'rb') as img_file:
-                img = {'Bytes': img_file.read()}
-
-            try:
-                response = self.client.recognize_celebrities(Image=img)
-                response_celebrities = response['CelebrityFaces']
-                celebrities_ids = [response_celebrity['Name'] for response_celebrity in response_celebrities]
-                celebrities_ids = celebrities_ids[:1]  # Return only a single celebrity
-                celebrities.append(celebrities_ids)
-            except ClientError:
-                raise
-
-        return celebrities
+        # Apply the function to the given image
+        with open(image, 'rb') as img_file:
+            img_payload = {'Bytes': img_file.read()}
+        output = service_map[service](img_payload)
+        return output

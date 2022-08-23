@@ -1,0 +1,7 @@
+boto3==1.24.27
+botocore==1.27.27
+google-cloud-vision==2.7.3
+imagecorruptions==1.1.2
+numpy==1.23.1
+Pillow==9.2.0
+scikit-image==0.19.3

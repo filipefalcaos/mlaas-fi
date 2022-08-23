@@ -1,0 +1,92 @@
+{
+  "experiments": {
+    "exp_1": {
+      "provider": "AWS",
+      "service": "LABEL_DETECTION",
+      "dataset": "label-detection",
+      "output_dir": "results",
+      "data_faults": [
+        {
+          "name": "gaussian_blur",
+          "parameter": {
+            "name": "severity",
+            "values": [1, 2, 3, 4, 5]
+          }
+        },
+        {
+          "name": "motion_blur",
+          "parameter": {
+            "name": "severity",
+            "values": [1, 2, 3, 4, 5]
+          }
+        },
+        {
+          "name": "zoom_blur",
+          "parameter": {
+            "name": "severity",
+            "values": [1, 2, 3, 4, 5]
+          }
+        },
+        {
+          "name": "gaussian_noise",
+          "parameter": {
+            "name": "severity",
+            "values": [1, 2, 3, 4, 5]
+          }
+        },
+        {
+          "name": "sp_noise",
+          "parameter": {
+            "name": "severity",
+            "values": [1, 2, 3, 4, 5]
+          }
+        },
+        { "name": "condensation" },
+        {
+          "name": "fog",
+          "parameter": {
+            "name": "severity",
+            "values": [1, 2, 3, 4, 5]
+          }
+        },
+        { "name": "frost" },
+        {
+          "name": "rain_snow",
+          "parameter": {
+            "name": "severity",
+            "values": [1, 2, 3, 4, 5]
+          }
+        },
+        {
+          "name": "brightness",
+          "parameter": {
+            "name": "severity",
+            "values": [1, 2, 3, 4, 5]
+          }
+        },
+        {
+          "name": "chromatic_aberration",
+          "parameter": {
+            "name": "factor",
+            "values": [1, 2]
+          }
+        },
+        {
+          "name": "contrast",
+          "parameter": {
+            "name": "severity",
+            "values": [1, 2, 3, 4, 5]
+          }
+        },
+        { "name": "grayscale" },
+        {
+          "name": "pixelation",
+          "parameter": {
+            "name": "severity",
+            "values": [1, 2, 3, 4, 5]
+          }
+        }
+      ]
+    }
+  }
+}
