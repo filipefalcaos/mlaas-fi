@@ -1,9 +1,0 @@
-{
-  "providers": {
-    "AWS": {
-      "access_key_id": "xxxxxxxxxxx",
-      "secret_access_key": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-      "region_name": "us-east-2"
-    }
-  }
-}

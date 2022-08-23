@@ -1,0 +1,15 @@
+{
+  "providers": {
+    "AWS": {
+      "access_key_id": "xxxxxxxxxxxxx",
+      "secret_access_key": "xxxxxxxxxxxxx",
+      "region_name": "us-east-2"
+    },
+    "MSFT_AZURE": {
+      "subscription_key_vision": "xxxxxxxxxxxxx",
+      "subscription_key_face": "xxxxxxxxxxxxx",
+      "endpoint_vision": "https://xxxxxxxxxxxxx.cognitiveservices.azure.com",
+      "endpoint_face": "https://xxxxxxxxxxxxx.cognitiveservices.azure.com"
+    }
+  }
+}
