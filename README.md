@@ -10,9 +10,10 @@ The framework implements interfaces for using machine learning APIs from three m
 providers. Currently, only computer vision services are implemented:
 
 - Amazon Rekognition (AWS): label detection, text detection, violence detection, nudity detection,
-  celebrity recongnition
-- Vision AI (Google Cloud): label detection, text detection, violence detection, nudity detection
-- Vision Service (Microsoft Azure): TODO
+  celebrity recongnition, face detection
+- Vision AI (Google Cloud): label detection, text detection, violence detection, nudity detection,
+  face detection
+- Vision Service (Microsoft Azure): label detection, nudity detection, face detection
 
 ## Data Faults
 Data Faults are problems in the input data of a system that may arise from external data collection
@@ -24,29 +25,31 @@ implementations rely on open-source Python packages, namely
 [imagecorruptions](https://github.com/bethgelab/imagecorruptions), [numpy](https://numpy.org),
 [pillow](https://python-pillow.org), and [scikit-image](https://scikit-image.org).
 
-For more details on the available image faults, please refer to [TODO: PAPER CITATION].
-
 #### Common Image Faults
-- Brightness Change (factor $f$)
-- Chromatic Aberration (factor $f$)
-- Gaussian Blur (standard deviation $sd$)
-- Gaussian Noise (mean $m$; standard deviation $sd$)
+- Brightness Change
+- Chromatic Aberration
+- Gaussian Blur
+- Motion Blur
+- Zoom Blur
+- Gaussian Noise
 - Grayscale
-- Missing Pixels (proportion $p$)
-- Salt & Pepper Noise (proportion $p$)
+- Missing Pixels
+- Salt & Pepper Noise
+- Contrast
+- Pixelation
 
 #### Weather-related Image Faults
 - Condensation
-- Fog (severity $s$)
+- Fog
 - Frost
-- Rain/Snow (severity $s$)
+- Rain/Snow
 
 ## Using Datasets
 _mlaas-fi_ requires a dataset to run experiments. Valid image datasets are are tarball files that
 should expand to a single directory with the dataset images.
 
 ### Study Datasets
-Five datasets were used in [TODO: PAPER CITATION] to evaluate the robustness of MLaaS services to data
+Five datasets were used in our study to evaluate the robustness of MLaaS services to data
 faults:
 
 - Celebrity Recognition: A random sample of 500 aligned and cropped images from the CelebA dataset [2].
